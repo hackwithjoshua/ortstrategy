@@ -1,0 +1,226 @@
+.section {
+  position: relative;
+  padding: 120px 24px;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(29,107,243,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  padding: 6px 16px;
+  background: rgba(0,200,255,0.08);
+  border: 1px solid rgba(0,200,255,0.2);
+  border-radius: 50px;
+}
+
+.heading {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.grad {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sub {
+  font-size: 1rem;
+  color: var(--white-60);
+}
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.card {
+  position: relative;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.featured {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(79,142,247,0.2);
+  box-shadow: 0 24px 80px rgba(29,107,243,0.1);
+  transform: scale(1.01);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quote {
+  color: var(--blue-bright);
+  font-size: 1.4rem;
+  opacity: 0.6;
+}
+
+.stars {
+  display: flex;
+  gap: 3px;
+  font-size: 0.8rem;
+}
+
+.testimonialText {
+  font-size: 0.93rem;
+  color: var(--white-80);
+  line-height: 1.75;
+  font-style: italic;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin-top: auto;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.role {
+  font-size: 0.78rem;
+  color: var(--white-60);
+  margin-top: 2px;
+}
+
+.featuredGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--white);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.arrow:hover {
+  background: rgba(29,107,243,0.3);
+  border-color: rgba(29,107,243,0.5);
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.activeDot {
+  background: var(--gradient-primary);
+  width: 24px;
+  border-radius: 4px;
+}
+
+@media (max-width: 900px) {
+  .cards { grid-template-columns: 1fr 1fr; }
+  .cards > *:last-child { display: none; }
+  .featured { transform: none; }
+}
+
+@media (max-width: 600px) {
+  .section { padding: 80px 16px; }
+  .cards { grid-template-columns: 1fr; }
+  .cards > *:nth-child(2), .cards > *:last-child { display: none; }
+}
