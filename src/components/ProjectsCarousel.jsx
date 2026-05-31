@@ -1,7 +1,9 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { FaChevronLeft, FaChevronRight, FaExternalLinkAlt } from 'react-icons/fa'
 import oswImg from '../assets/osw-turing.png'
+import oswVideo from '../assets/osw-demo.mp4'
+import gladeVideo from '../assets/gladefinance.mp4'
 import styles from './ProjectsCarousel.module.css'
 
 const projects = [
@@ -30,6 +32,7 @@ const projects = [
     tags: ['AI/ML', 'Data Labelling', 'Linux', 'macOS', 'Windows'],
     mockBg: 'linear-gradient(135deg, #1a1205 0%, #2e1e08 100%)',
     image: oswImg,
+    video: oswVideo,
   },
   {
     id: 3,
@@ -69,20 +72,36 @@ const projects = [
   },
   {
     id: 6,
-    title: 'LogiChain Portal',
-    category: 'Full Stack + DevOps',
-    desc: 'Supply chain management portal with blockchain traceability, GPS tracking, and predictive analytics for 200+ vendors.',
-    color1: '#00c8ff',
-    color2: '#4f8ef7',
-    accent: '#0ea5e9',
-    tags: ['React', 'Blockchain', 'Docker', 'ML'],
-    mockBg: 'linear-gradient(135deg, #031520 0%, #052233 100%)',
-    link: null,
+    title: 'Gladefinance',
+    category: 'Full Stack + Blockchain',
+    url: 'gladefinance.co',
+    link: 'https://gladefinance.co',
+    desc: 'Global Trade Financing Infrastructure powered by Stablecoin & AI. The all-in-one platform for importers, exporters, and financial institutions — delivering AI-driven financing, instant payments, yield, and spend management.',
+    color1: '#10b981',
+    color2: '#34d399',
+    accent: '#059669',
+    tags: ['Stablecoin', 'AI', 'Trade Finance', 'Payments', 'DeFi'],
+    mockBg: 'linear-gradient(135deg, #021a10 0%, #052e1a 100%)',
+    video: gladeVideo,
+    link: 'https://gladefinance.co',
   },
 ]
 
-function MockScreen({ project }) {
-  if (project.image) {
+function MockScreen({ project, isActive }) {
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    const vid = videoRef.current
+    if (!vid) return
+    if (isActive) {
+      vid.currentTime = 0
+      vid.play().catch(() => {})
+    } else {
+      vid.pause()
+    }
+  }, [isActive])
+
+  if (project.video || project.image) {
     return (
       <div className={styles.screen} style={{ background: project.mockBg }}>
         <div className={styles.screenBar}>
@@ -96,7 +115,19 @@ function MockScreen({ project }) {
           </div>
         </div>
         <div className={styles.realScreenshot}>
-          <img src={project.image} alt={project.title} className={styles.screenshotImg} />
+          {project.video ? (
+            <video
+              ref={videoRef}
+              src={project.video}
+              className={styles.screenshotImg}
+              loop
+              muted
+              playsInline
+              preload="auto"
+            />
+          ) : (
+            <img src={project.image} alt={project.title} className={styles.screenshotImg} />
+          )}
         </div>
       </div>
     )
@@ -223,7 +254,7 @@ export default function ProjectsCarousel() {
                     transition={{ duration: 0.3 }}
                     style={{ '--shadow': p.color1 }}
                   >
-                    <MockScreen project={p} />
+                    <MockScreen project={p} isActive={true} />
                     <div className={styles.screenGlow} style={{ background: `radial-gradient(ellipse at bottom, ${p.color1}30, transparent 70%)` }} />
                   </motion.div>
                 </div>

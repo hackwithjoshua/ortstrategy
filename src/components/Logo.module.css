@@ -1,0 +1,74 @@
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+}
+
+.markWrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ort {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.85) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.divider {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.25), transparent);
+  flex-shrink: 0;
+}
+
+.textStack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+}
+
+.strategy {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.2;
+  text-align: justify;
+  text-align-last: justify;
+  text-justify: inter-character;
+  display: block;
+  width: 100%;
+}
+
+.tech {
+  font-family: var(--font-main);
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+  display: block;
+  white-space: nowrap;
+}

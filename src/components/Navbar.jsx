@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaBars, FaTimes } from 'react-icons/fa'
+import Logo from './Logo'
 import styles from './Navbar.module.css'
 
 const links = ['Home', 'About', 'Services', 'Projects', 'Testimonials', 'Contact']
@@ -29,25 +30,7 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <div className={styles.container}>
-        <motion.div
-          className={styles.logo}
-          whileHover={{ scale: 1.04 }}
-          onClick={() => scrollTo('home')}
-        >
-          <span className={styles.logoIcon}>
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <polygon points="16,2 30,28 2,28" fill="none" stroke="url(#g)" strokeWidth="2.5" strokeLinejoin="round"/>
-              <polygon points="16,10 24,26 8,26" fill="url(#g)" opacity="0.3"/>
-              <defs>
-                <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#1d6bf3"/>
-                  <stop offset="100%" stopColor="#00c8ff"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </span>
-          <span className={styles.logoText}>ORT <span>Strategy</span></span>
-        </motion.div>
+        <Logo size={38} showText onClick={() => scrollTo('home')} />
 
         <ul className={styles.links}>
           {links.map((l) => (
