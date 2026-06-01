@@ -123,7 +123,7 @@ function MockScreen({ project, isActive }) {
               loop
               muted
               playsInline
-              preload="auto"
+              preload={isActive ? 'auto' : 'none'}
             />
           ) : (
             <img src={project.image} alt={project.title} className={styles.screenshotImg} />

@@ -47,7 +47,7 @@
 
 .sub {
   font-size: 1.05rem;
-  color: var(--white-60);
+  color: var(--text-secondary);
 }
 
 /* ── Grid ── */
@@ -71,8 +71,8 @@
 
 /* ── Compressed card ── */
 .card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
   border-radius: 20px;
   padding: 24px 18px;
   display: flex;
@@ -127,6 +127,33 @@
   border-radius: 20px;
 }
 
+/* Mobile show more button — hidden on desktop */
+.showMoreBtn {
+  display: none;
+  background: none;
+  border: 1px solid;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+  width: fit-content;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.mobileExpandedContent {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.cardMobileOpen {
+  border-color: var(--border-glow) !important;
+}
+
 .cardGlow {
   position: absolute;
   inset: 0;
@@ -141,7 +168,7 @@
   min-width: 300px;
   width: max-content;
   max-width: 340px;
-  background: rgba(10, 18, 40, 0.97);
+  background: var(--bg-card);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid;
@@ -177,7 +204,7 @@
 
 .expandedDesc {
   font-size: 0.82rem;
-  color: var(--white-60);
+  color: var(--text-secondary);
   line-height: 1.7;
 }
 
@@ -221,4 +248,12 @@
 
 @media (max-width: 460px) {
   .grid { grid-template-columns: 1fr; }
+}
+
+/* Mobile: switch from hover to show more/less */
+@media (max-width: 768px) {
+  .hoverHint { display: none; }
+  .showMoreBtn { display: block; }
+  .mobileExpandedContent { display: flex; }
+  .expanded { display: none !important; }
 }

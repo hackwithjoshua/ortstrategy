@@ -1,0 +1,115 @@
+.section {
+  position: relative;
+  padding: 48px 0 64px;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.label {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+
+.track {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Fade edges */
+.fade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  background: linear-gradient(to right, var(--bg-page), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.fadeRight {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  background: linear-gradient(to left, var(--bg-page), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.marquee {
+  overflow: hidden;
+  width: 100%;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: max-content;
+  animation: scroll 22s linear infinite;
+}
+
+.inner:hover {
+  animation-play-state: paused;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.logoItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 48px;
+  height: 64px;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-card);
+}
+
+.logoItem:hover {
+  opacity: 1;
+}
+
+.logoImg {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+[data-theme="light"] .logoImg {
+  filter: brightness(0);
+}
+
+.logoImgColor {
+  filter: brightness(0) invert(0.65) !important;
+}
+
+[data-theme="light"] .logoImgColor {
+  filter: none !important;
+}
+
+.logoItem:has(.logoImgColor) {
+  opacity: 1;
+}
+
+.logoText {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}

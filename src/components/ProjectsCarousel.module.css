@@ -57,8 +57,8 @@
 }
 
 .carousel {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
   border-radius: 28px;
   overflow: hidden;
   min-height: 460px;

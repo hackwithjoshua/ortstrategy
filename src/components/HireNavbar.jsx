@@ -5,21 +5,21 @@ import { FiSun, FiMoon } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import Logo from './Logo'
 import { useTheme } from '../context/ThemeContext'
-import styles from './Navbar.module.css'
+import styles from './HireNavbar.module.css'
 
-const links = ['Home', 'About', 'Services', 'Projects', 'Testimonials', 'Contact']
+const links = [
+  { label: 'Process', id: 'process' },
+  { label: 'Tech Stacks', id: 'tech-stacks' },
+  { label: 'Our Talent', id: 'our-talent' },
+  { label: 'Engagement Models', id: 'engagement-models' },
+  { label: 'Contact', id: 'hire-form' },
+]
 
 function ThemeToggle() {
   const { theme, toggle } = useTheme()
   const isLight = theme === 'light'
-
   return (
-    <motion.button
-      className={styles.toggle}
-      onClick={toggle}
-      whileTap={{ scale: 0.93 }}
-      aria-label="Toggle theme"
-    >
+    <motion.button className={styles.toggle} onClick={toggle} whileTap={{ scale: 0.93 }} aria-label="Toggle theme">
       <motion.div
         className={styles.toggleTrack}
         animate={{ background: isLight ? 'rgba(29,107,243,0.12)' : 'rgba(255,255,255,0.08)' }}
@@ -37,7 +37,7 @@ function ThemeToggle() {
   )
 }
 
-export default function Navbar() {
+export default function HireNavbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -48,8 +48,7 @@ export default function Navbar() {
   }, [])
 
   const scrollTo = (id) => {
-    const el = document.getElementById(id.toLowerCase())
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
     setOpen(false)
   }
 
@@ -61,13 +60,15 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <div className={styles.container}>
-        <Logo size={38} showText onClick={() => scrollTo('home')} />
+        <Link to="/" className={styles.logoWrap}>
+          <Logo size={36} showText />
+        </Link>
 
         <ul className={styles.links}>
-          {links.map((l) => (
-            <li key={l}>
-              <button className={styles.link} onClick={() => scrollTo(l)}>
-                {l}
+          {links.map(l => (
+            <li key={l.id}>
+              <button className={styles.link} onClick={() => scrollTo(l.id)}>
+                {l.label}
               </button>
             </li>
           ))}
@@ -75,16 +76,16 @@ export default function Navbar() {
 
         <div className={styles.actions}>
           <ThemeToggle />
-          <Link to="/hire-engineers" className={styles.hireLink}>
-            Hire Engineers
+          <Link to="/" className={styles.backBtn}>
+            ← Back to OrtStrategy
           </Link>
           <motion.button
             className={styles.cta}
-            onClick={() => scrollTo('Contact')}
+            onClick={() => scrollTo('hire-form')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
           >
-            Get Started
+            Hire Now
           </motion.button>
         </div>
 
@@ -102,18 +103,16 @@ export default function Navbar() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {links.map((l) => (
-              <button key={l} className={styles.mobileLink} onClick={() => scrollTo(l)}>
-                {l}
+            {links.map(l => (
+              <button key={l.id} className={styles.mobileLink} onClick={() => scrollTo(l.id)}>
+                {l.label}
               </button>
             ))}
-            <Link to="/hire-engineers" className={styles.mobileHireLink}>
-              Hire Engineers
-            </Link>
+            <Link to="/" className={styles.mobileBack}>← Back to OrtStrategy</Link>
             <div className={styles.mobileBottom}>
               <ThemeToggle />
-              <button className={styles.mobileCta} onClick={() => scrollTo('Contact')}>
-                Get Started
+              <button className={styles.mobileCta} onClick={() => scrollTo('hire-form')}>
+                Hire Now
               </button>
             </div>
           </motion.div>

@@ -23,25 +23,32 @@
   padding: 0 24px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
+}
+
+.logoWrap {
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
 .links {
   display: flex;
   list-style: none;
-  gap: 4px;
+  gap: 2px;
   margin-left: auto;
 }
 
 .link {
   background: none;
   color: var(--nav-link);
-  font-size: 0.9rem;
+  font-size: 0.87rem;
   font-weight: 500;
-  padding: 8px 14px;
+  padding: 7px 12px;
   border-radius: 8px;
-  transition: all 0.2s ease;
-  letter-spacing: 0.02em;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
 }
 
 .link:hover {
@@ -56,12 +63,24 @@
   flex-shrink: 0;
 }
 
-/* ── Theme toggle ── */
-.toggle {
-  background: none;
-  padding: 0;
-  flex-shrink: 0;
+.backBtn {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s;
+  padding: 8px 12px;
+  border-radius: 8px;
 }
+
+.backBtn:hover {
+  color: var(--text-primary);
+  background: var(--white-20);
+}
+
+/* Toggle — same as main navbar */
+.toggle { background: none; padding: 0; flex-shrink: 0; }
 
 .toggleTrack {
   position: relative;
@@ -76,12 +95,7 @@
   transition: all 0.3s;
 }
 
-.toggleIcon {
-  font-size: 0.7rem;
-  z-index: 1;
-  transition: color 0.3s;
-}
-
+.toggleIcon { font-size: 0.7rem; z-index: 1; }
 .moon { color: var(--blue-bright); }
 .sun { color: #f59e0b; }
 
@@ -95,55 +109,21 @@
   box-shadow: 0 2px 8px rgba(29,107,243,0.4);
 }
 
-.hireLink {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--cyan);
-  padding: 9px 18px;
-  border: 1px solid rgba(0,200,255,0.3);
-  border-radius: 50px;
-  background: rgba(0,200,255,0.06);
-  white-space: nowrap;
-  transition: all 0.2s;
-  text-decoration: none;
-}
-
-.hireLink:hover {
-  background: rgba(0,200,255,0.12);
-  border-color: rgba(0,200,255,0.5);
-}
-
-.mobileHireLink {
-  display: block;
-  color: var(--cyan);
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: rgba(0,200,255,0.06);
-  border: 1px solid rgba(0,200,255,0.2);
-  text-align: left;
-  text-decoration: none;
-  margin: 4px 0;
-}
-
 .cta {
   background: var(--gradient-primary);
   color: #fff;
   font-size: 0.88rem;
   font-weight: 600;
-  padding: 10px 22px;
+  padding: 10px 20px;
   border-radius: 50px;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
   box-shadow: 0 0 20px rgba(29,107,243,0.3);
   white-space: nowrap;
+  cursor: pointer;
+  border: none;
 }
 
-.cta:hover {
-  box-shadow: 0 0 30px rgba(29,107,243,0.6);
-}
+.cta:hover { box-shadow: 0 0 30px rgba(29,107,243,0.6); }
 
 .hamburger {
   display: none;
@@ -152,6 +132,8 @@
   font-size: 1.3rem;
   padding: 4px;
   margin-left: auto;
+  border: none;
+  cursor: pointer;
 }
 
 .mobile {
@@ -167,18 +149,30 @@
 
 .mobileLink {
   background: none;
+  border: none;
   color: var(--text-secondary);
   font-size: 1rem;
   font-weight: 500;
   padding: 12px 16px;
   border-radius: 8px;
   text-align: left;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
 .mobileLink:hover {
   background: var(--white-20);
   color: var(--text-primary);
+}
+
+.mobileBack {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  text-decoration: none;
+  border-radius: 8px;
 }
 
 .mobileBottom {
@@ -196,11 +190,13 @@
   font-weight: 600;
   padding: 12px 20px;
   border-radius: 50px;
+  border: none;
+  cursor: pointer;
   flex: 1;
   text-align: center;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .links, .actions { display: none; }
   .hamburger { display: block; }
 }

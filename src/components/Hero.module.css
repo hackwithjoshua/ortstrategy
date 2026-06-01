@@ -22,7 +22,7 @@
   left: -200px;
   width: 700px;
   height: 700px;
-  background: radial-gradient(circle, rgba(29, 107, 243, 0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--orb1) 0%, transparent 70%);
   border-radius: 50%;
   animation: float1 12s ease-in-out infinite;
 }
@@ -33,7 +33,7 @@
   right: -150px;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(0, 200, 255, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--orb2) 0%, transparent 70%);
   border-radius: 50%;
   animation: float2 15s ease-in-out infinite;
 }
@@ -145,7 +145,7 @@
 
 .sub {
   font-size: clamp(1rem, 2.5vw, 1.15rem);
-  color: var(--white-60);
+  color: var(--text-secondary);
   line-height: 1.7;
   max-width: 640px;
   font-weight: 400;

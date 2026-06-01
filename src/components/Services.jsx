@@ -10,8 +10,8 @@ const services = [
   {
     id: 'devops',
     icon: FaServer,
-    color: '#1d6bf3',
-    glow: 'rgba(29,107,243,0.3)',
+    color: 'var(--service-accent)',
+    glow: 'var(--service-glow)',
     title: 'DevOps Engineering',
     tagline: 'Ship faster, break less, scale effortlessly.',
     desc: 'We architect and automate your entire delivery pipeline from code commit to production. Multi-cloud IaC, container orchestration, and cloud-native deployments built to last.',
@@ -27,8 +27,8 @@ const services = [
   {
     id: 'data-engineering',
     icon: FaDatabase,
-    color: '#f97316',
-    glow: 'rgba(249,115,22,0.3)',
+    color: 'var(--service-accent)',
+    glow: 'var(--service-glow)',
     title: 'Data Engineering',
     tagline: 'From raw data to production-grade intelligence.',
     desc: 'We design and build the data infrastructure your organisation needs to move fast. Pipelines, warehouses, lakes, and model-training datasets crafted for reliability and scale.',
@@ -44,8 +44,8 @@ const services = [
   {
     id: 'system-design',
     icon: FaProjectDiagram,
-    color: '#00c8ff',
-    glow: 'rgba(0,200,255,0.3)',
+    color: 'var(--service-accent)',
+    glow: 'var(--service-glow)',
     title: 'System Design',
     tagline: 'Architecture that scales from day one.',
     desc: 'From microservices to event-driven systems, we design architectures built to handle millions of users. We document, model, and validate every decision so your team can execute with confidence.',
@@ -60,8 +60,8 @@ const services = [
   {
     id: 'security',
     icon: FaShieldAlt,
-    color: '#7c3aed',
-    glow: 'rgba(124,58,237,0.3)',
+    color: 'var(--service-accent)',
+    glow: 'var(--service-glow)',
     title: 'Security Consultation',
     tagline: 'Protect what you built before attackers find it.',
     desc: 'We embed security into every layer of your stack. Threat modelling, penetration testing guidance, compliance frameworks, and secure SDLC practices that keep your business safe and your data protected.',
@@ -76,8 +76,8 @@ const services = [
   {
     id: 'fullstack',
     icon: FaCode,
-    color: '#10b981',
-    glow: 'rgba(16,185,129,0.3)',
+    color: 'var(--service-accent)',
+    glow: 'var(--service-glow)',
     title: 'Full Stack Development',
     tagline: 'Beautiful frontends. Powerful backends. Zero compromise.',
     desc: 'We craft end-to-end digital products from pixel-perfect UIs to battle-tested APIs. Our full-stack teams move fast, write clean code, and deliver features that delight users and scale with your growth.',
@@ -95,8 +95,8 @@ function ServiceCard({ s, i, total }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
   const [hovered, setHovered] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  // Last two cards expand to the left so they don't overflow the viewport
   const expandDir = i >= total - 2 ? 'right' : 'left'
 
   return (
@@ -111,22 +111,53 @@ function ServiceCard({ s, i, total }) {
       style={{ '--accent': s.color, '--glow': s.glow }}
     >
       {/* Compressed always-visible card */}
-      <div className={`${styles.card} ${hovered ? styles.cardActive : ''}`}
-        style={{ borderColor: hovered ? `${s.color}50` : undefined }}
-      >
-        <div className={styles.iconBox} style={{ background: `${s.color}20`, boxShadow: `0 6px 20px ${s.glow}` }}>
+      <div className={`${styles.card} ${hovered ? styles.cardActive : ''} ${mobileOpen ? styles.cardMobileOpen : ''}`}>
+        <div className={styles.iconBox} style={{ background: 'var(--service-icon-bg)', boxShadow: '0 6px 20px var(--service-glow)' }}>
           <s.icon style={{ color: s.color, fontSize: '1.2rem' }} />
         </div>
         <h3 className={styles.cardTitle}>{s.title}</h3>
         <p className={styles.tagline} style={{ color: s.color }}>{s.tagline}</p>
 
+        {/* Desktop: hover hint */}
         <div className={styles.hoverHint}>
-          <span style={{ background: `${s.color}20`, color: s.color }}>Hover to explore</span>
+          <span style={{ background: 'var(--service-icon-bg)', color: s.color }}>Hover to explore</span>
         </div>
+
+        {/* Mobile: inline expanded content */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              className={styles.mobileExpandedContent}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <p className={styles.expandedDesc}>{s.desc}</p>
+              <ul className={styles.expandedFeatures}>
+                {s.features.map(f => (
+                  <li key={f}>
+                    <FaCheckCircle style={{ color: s.color, flexShrink: 0, fontSize: '0.75rem' }} />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile: show more / show less button */}
+        <button
+          className={styles.showMoreBtn}
+          onClick={() => setMobileOpen(o => !o)}
+          style={{ color: s.color, borderColor: `${s.color}40` }}
+        >
+          {mobileOpen ? 'Show less ↑' : 'Show more ↓'}
+        </button>
 
         {hovered && (
           <div className={styles.cardGlow}
-            style={{ background: `radial-gradient(ellipse at top, ${s.color}18, transparent 70%)` }}
+            style={{ background: `radial-gradient(ellipse at top, var(--service-icon-bg), transparent 70%)` }}
           />
         )}
       </div>
@@ -147,7 +178,7 @@ function ServiceCard({ s, i, total }) {
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
             <div className={styles.expandedTop}>
-              <div className={styles.iconBox} style={{ background: `${s.color}20`, boxShadow: `0 6px 20px ${s.glow}` }}>
+              <div className={styles.iconBox} style={{ background: 'var(--service-icon-bg)', boxShadow: '0 6px 20px var(--service-glow)' }}>
                 <s.icon style={{ color: s.color, fontSize: '1.2rem' }} />
               </div>
               <div>
