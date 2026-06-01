@@ -1,0 +1,91 @@
+<svg width="400" height="80" viewBox="0 0 400 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d6bf3"/>
+      <stop offset="100%" stop-color="#00c8ff"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00c8ff"/>
+      <stop offset="100%" stop-color="#1d6bf3"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="cg">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── Icon mark — 52×52, centred in 80px height (top offset = 14) ── -->
+  <g transform="translate(14, 14)">
+    <path d="M26 1 L51 26 L26 51 L1 26 Z"
+      stroke="url(#g1)" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+    <line x1="26" y1="1"  x2="26" y2="11" stroke="url(#g1)" stroke-width="1.1" stroke-linecap="round" opacity="0.6"/>
+    <line x1="51" y1="26" x2="41" y2="26" stroke="url(#g1)" stroke-width="1.1" stroke-linecap="round" opacity="0.6"/>
+    <line x1="26" y1="51" x2="26" y2="41" stroke="url(#g1)" stroke-width="1.1" stroke-linecap="round" opacity="0.6"/>
+    <line x1="1"  y1="26" x2="11" y2="26" stroke="url(#g1)" stroke-width="1.1" stroke-linecap="round" opacity="0.6"/>
+    <path d="M26 11 L41 26 L26 41 L11 26 Z"
+      stroke="url(#g2)" stroke-width="1.1" fill="rgba(29,107,243,0.1)" stroke-linejoin="round"/>
+    <circle cx="26" cy="11" r="1.8" fill="url(#g1)" filter="url(#glow)" opacity="0.8"/>
+    <circle cx="41" cy="26" r="1.8" fill="url(#g1)" filter="url(#glow)" opacity="0.8"/>
+    <circle cx="26" cy="41" r="1.8" fill="url(#g1)" filter="url(#glow)" opacity="0.8"/>
+    <circle cx="11" cy="26" r="1.8" fill="url(#g1)" filter="url(#glow)" opacity="0.8"/>
+    <circle cx="26" cy="1"  r="2.4" fill="url(#g1)" filter="url(#glow)"/>
+    <circle cx="51" cy="26" r="2.4" fill="url(#g1)" filter="url(#glow)"/>
+    <circle cx="26" cy="51" r="2.4" fill="url(#g1)" filter="url(#glow)"/>
+    <circle cx="1"  cy="26" r="2.4" fill="url(#g1)" filter="url(#glow)"/>
+    <circle cx="26" cy="26" r="7.5" stroke="url(#g1)" stroke-width="0.6" fill="none" opacity="0.25"/>
+    <circle cx="26" cy="26" r="4.8" fill="url(#g1)" filter="url(#cg)"/>
+    <circle cx="26" cy="26" r="2.1" fill="#ffffff" opacity="0.95"/>
+  </g>
+
+  <!-- ── ORT + divider + text stack — all move together ── -->
+  <g transform="translate(8, 0)">
+  <text
+    x="70" y="40"
+    dominant-baseline="central"
+    font-family="'Space Grotesk','Inter',system-ui,-apple-system,sans-serif"
+    font-size="28"
+    font-weight="800"
+    letter-spacing="-0.5"
+    fill="#ffffff">ORT</text>
+
+  <!-- ── Divider — centred, 32px tall ── -->
+  <line x1="132" y1="24" x2="132" y2="56"
+    stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+
+  <!--
+    Strategy + TECH SERVICES block:
+    Block total visual height = 14 (strategy cap) + 5 (gap) + 7 (tech cap) = 26px
+    Block centre = 40 (same as ORT)
+    Strategy centre  = 40 - (5/2 + 7/2) = 40 - 6 = 34
+    TechSvc centre   = 40 + (14/2 + 5/2) = 40 + 9.5 = 49.5 ≈ 50
+  -->
+
+  <!-- ── Strategy ── -->
+  <text
+    x="144" y="34"
+    dominant-baseline="central"
+    font-family="'Space Grotesk','Inter',system-ui,-apple-system,sans-serif"
+    font-size="15"
+    font-weight="600"
+    textLength="86"
+    lengthAdjust="spacingAndGlyphs"
+    fill="rgba(255,255,255,0.92)">Strategy</text>
+
+  <!-- ── TECH SERVICES ── -->
+  <text
+    x="144" y="50"
+    dominant-baseline="central"
+    font-family="'Inter',system-ui,-apple-system,sans-serif"
+    font-size="8"
+    font-weight="500"
+    textLength="86"
+    lengthAdjust="spacing"
+    fill="rgba(255,255,255,0.38)">TECH SERVICES</text>
+  </g>
+
+</svg>

@@ -95,6 +95,17 @@
   box-shadow: 0 2px 8px rgba(29,107,243,0.4);
 }
 
+.logoImg {
+  height: 70px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .logoImg {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 .hireLink {
   display: inline-flex;
   align-items: center;

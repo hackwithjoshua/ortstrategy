@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FaLinkedin, FaGithub, FaTwitter, FaArrowUp, FaEnvelope } from 'react-icons/fa'
-import Logo from './Logo'
+import ortLogo from '../assets/ort-logo.svg'
 import styles from './Footer.module.css'
 
 const footerLinks = {
@@ -14,7 +14,7 @@ const footerLinks = {
   ],
 }
 
-export default function Footer() {
+export default function Footer({ email = 'contact@ortstrategy.com' }) {
   const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
   return (
@@ -23,7 +23,7 @@ export default function Footer() {
       <div className={styles.container}>
         <div className={styles.main}>
           <div className={styles.brand}>
-            <Logo size={40} showText />
+            <img src={ortLogo} alt="ORT Strategy" className={styles.logoImg} />
             <p className={styles.tagline}>
               Engineering the digital future, one scalable solution at a time.
               We build tech that lasts.
@@ -39,9 +39,9 @@ export default function Footer() {
                 </motion.a>
               ))}
             </div>
-            <a href="mailto:contact@ortstrategy.com" className={styles.email}>
+            <a href={`mailto:${email}`} className={styles.email}>
               <FaEnvelope />
-              contact@ortstrategy.com
+              {email}
             </a>
           </div>
 

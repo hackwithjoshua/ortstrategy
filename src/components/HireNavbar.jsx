@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import { FiSun, FiMoon } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
-import Logo from './Logo'
+import ortLogo from '../assets/ort-logo.svg'
 import { useTheme } from '../context/ThemeContext'
 import styles from './HireNavbar.module.css'
 
@@ -61,7 +61,7 @@ export default function HireNavbar() {
     >
       <div className={styles.container}>
         <Link to="/" className={styles.logoWrap}>
-          <Logo size={36} showText />
+          <img src={ortLogo} alt="ORT Strategy" className={styles.logoImg} />
         </Link>
 
         <ul className={styles.links}>

@@ -31,6 +31,17 @@
   flex-shrink: 0;
 }
 
+.logoImg {
+  height: 70px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+[data-theme="light"] .logoImg {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 .links {
   display: flex;
   list-style: none;

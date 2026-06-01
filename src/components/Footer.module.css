@@ -38,6 +38,16 @@
   gap: 10px;
 }
 
+.logoImg {
+  height: 70px;
+  width: auto;
+  display: block;
+}
+
+[data-theme="light"] .logoImg {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 .tagline {
   font-size: 0.9rem;
   color: var(--text-secondary);
