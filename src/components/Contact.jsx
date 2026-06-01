@@ -95,7 +95,7 @@ export default function Contact() {
                 <div className={styles.contactIcon}><FaEnvelope /></div>
                 <div>
                   <p className={styles.contactLabel}>Email</p>
-                  <p className={styles.contactValue}>hello@ortstrategy.com</p>
+                  <p className={styles.contactValue}>contact@ortstrategy.com</p>
                 </div>
               </div>
               <div className={styles.contactItem}>
@@ -246,7 +246,7 @@ export default function Contact() {
                   animate={{ opacity: 1, y: 0 }}
                 >
                   <FaExclamationCircle />
-                  <span>Something went wrong. Please email us directly at hello@ortstrategy.com</span>
+                  <span>Something went wrong. Please email us directly at contact@ortstrategy.com</span>
                 </motion.div>
               )}
 

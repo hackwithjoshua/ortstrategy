@@ -30,9 +30,9 @@ export default function Footer() {
                 </motion.a>
               ))}
             </div>
-            <a href="mailto:hello@ortstrategy.com" className={styles.email}>
+            <a href="mailto:contact@ortstrategy.com" className={styles.email}>
               <FaEnvelope />
-              hello@ortstrategy.com
+              contact@ortstrategy.com
             </a>
           </div>
 
