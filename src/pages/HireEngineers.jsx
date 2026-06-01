@@ -227,7 +227,10 @@ function EngagementCard({ e, i }) {
           </li>
         ))}
       </ul>
-      <button className={`${styles.engBtn} ${e.highlight ? styles.engBtnPrimary : styles.engBtnSecondary}`}>
+      <button
+        className={`${styles.engBtn} ${e.highlight ? styles.engBtnPrimary : styles.engBtnSecondary}`}
+        onClick={() => document.getElementById('hire-form')?.scrollIntoView({ behavior: 'smooth' })}
+      >
         {e.cta} <FaArrowRight style={{ fontSize: '0.75rem' }} />
       </button>
     </motion.div>
@@ -396,8 +399,8 @@ export default function HireEngineers() {
           <div className={styles.container}>
             <div className={styles.sectionHeader}>
               <span className={styles.pill}>Our Talent</span>
-              <h2>Sample <span className={styles.grad}>Engineer Profiles</span></h2>
-              <p>A snapshot of who's available. Tell us your needs and we'll match you precisely.</p>
+              <h2>Engineers <span className={styles.grad}>Ready to Ship</span></h2>
+              <p>A look at the talent in our network. Tell us your needs and we'll match you precisely.</p>
             </div>
             <div className={styles.profilesGrid}>
               {profiles.map((p, i) => <ProfileCard key={p.role} p={p} i={i} />)}
