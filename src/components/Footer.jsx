@@ -6,7 +6,7 @@ import styles from './Footer.module.css'
 
 const footerLinks = {
   Services: ['DevOps Engineering', 'System Design', 'Security Consultation', 'Full Stack Development', 'Cloud Architecture'],
-  Company: ['About Us', 'Our Work', 'Testimonials', { label: 'Hire Engineers', href: '/hire-engineers', internal: true }, { label: 'Blog', href: 'https://blog.ortstrategy.com/' }],
+  Company: ['About Us', 'Our Work', 'Testimonials', { label: 'Hire Engineers', href: '/hire-engineers', internal: true }, { label: 'Blog', href: '/blog', internal: true }],
   Legal: [
     { label: 'Privacy Policy', href: '/privacy-policy', internal: true },
     { label: 'Terms of Service', href: '/terms-of-service', internal: true },

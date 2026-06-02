@@ -1,4 +1,5 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import emailjs from '@emailjs/browser'
 import { motion, useInView } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
@@ -455,26 +456,55 @@ export default function HireEngineers() {
 }
 
 function HireForm() {
+  const [form, setForm] = useState({ company:'', name:'', email:'', engagement:'', role:'', message:'' })
+  const [status, setStatus] = useState(null)
+  const [loading, setLoading] = useState(false)
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true); setStatus(null)
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_HIRE_TEMPLATE_ID,
+        {
+          name: form.name,
+          email: form.email,
+          company: form.company,
+          engagement: form.engagement || 'Not specified',
+          role: form.role,
+          message: form.message,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      )
+      setStatus('success')
+      setForm({ company:'', name:'', email:'', engagement:'', role:'', message:'' })
+    } catch { setStatus('error') }
+    finally { setLoading(false) }
+  }
+
   return (
-    <form className={styles.hireForm} onSubmit={e => e.preventDefault()}>
+    <form className={styles.hireForm} onSubmit={handleSubmit}>
       <div className={styles.formRow}>
         <div className={styles.formField}>
           <label>Company Name *</label>
-          <input type="text" placeholder="Acme Inc." required />
+          <input type="text" value={form.company} onChange={e=>set('company',e.target.value)} placeholder="Acme Inc." required />
         </div>
         <div className={styles.formField}>
           <label>Your Name *</label>
-          <input type="text" placeholder="John Doe" required />
+          <input type="text" value={form.name} onChange={e=>set('name',e.target.value)} placeholder="John Doe" required />
         </div>
       </div>
       <div className={styles.formRow}>
         <div className={styles.formField}>
           <label>Work Email *</label>
-          <input type="email" placeholder="john@acme.com" required />
+          <input type="email" value={form.email} onChange={e=>set('email',e.target.value)} placeholder="john@acme.com" required />
         </div>
         <div className={styles.formField}>
           <label>Engagement Type</label>
-          <select>
+          <select value={form.engagement} onChange={e=>set('engagement',e.target.value)}>
             <option value="">Select...</option>
             <option>Part-Time (20 hrs/week)</option>
             <option>Full-Time (40 hrs/week)</option>
@@ -484,19 +514,32 @@ function HireForm() {
       </div>
       <div className={styles.formField}>
         <label>Tech Stack / Role Needed *</label>
-        <input type="text" placeholder="e.g. Senior React + Node.js engineer" required />
+        <input type="text" value={form.role} onChange={e=>set('role',e.target.value)} placeholder="e.g. Senior React + Node.js engineer" required />
       </div>
       <div className={styles.formField}>
         <label>Tell Us More</label>
-        <textarea rows={4} placeholder="Describe the role, project context, team size, and any specific requirements..." />
+        <textarea rows={4} value={form.message} onChange={e=>set('message',e.target.value)} placeholder="Describe the role, project context, team size, and any specific requirements..." />
       </div>
+
+      {status === 'success' && (
+        <div className={styles.successMsg}>
+          Request sent! We will get back to you within 24 hours.
+        </div>
+      )}
+      {status === 'error' && (
+        <div className={styles.errorMsg}>
+          Something went wrong. Email us directly at hireengineers@ortstrategy.com
+        </div>
+      )}
+
       <motion.button
         type="submit"
         className={styles.submitBtn}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        disabled={loading}
+        whileHover={{ scale: loading ? 1 : 1.02 }}
+        whileTap={{ scale: loading ? 1 : 0.98 }}
       >
-        Send Request. We'll Respond in 24 Hours <FaArrowRight style={{ fontSize: '0.8rem' }} />
+        {loading ? <span className={styles.spinner} /> : <>Send Request. We'll Respond in 24 Hours <FaArrowRight style={{ fontSize: '0.8rem' }} /></>}
       </motion.button>
     </form>
   )

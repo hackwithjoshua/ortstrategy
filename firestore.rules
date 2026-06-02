@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function getRole(uid) {
+      return get(/databases/$(database)/documents/adminRoles/$(uid)).data.role
+    }
+
+    function isAdmin() {
+      return request.auth != null && getRole(request.auth.uid) in ['admin', 'superadmin']
+    }
+
+    function isSuperAdmin() {
+      return request.auth != null && getRole(request.auth.uid) == 'superadmin'
+    }
+
+    // Blog posts
+    match /posts/{postId} {
+      allow read: if true;
+      allow create, update: if isAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // Admin roles — only super admins can manage roles
+    match /adminRoles/{uid} {
+      allow read: if request.auth != null;
+      allow write: if isSuperAdmin();
+    }
+  }
+}

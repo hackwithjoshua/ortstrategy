@@ -1,6 +1,7 @@
 import './index.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
+import { AuthProvider } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import RegBanner from './components/RegBanner'
 import CookieBanner from './components/CookieBanner'
@@ -18,6 +19,9 @@ import HireEngineers from './pages/HireEngineers'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
 import WorkPolicy from './pages/WorkPolicy'
+import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
+import Admin from './pages/Admin'
 
 function Home() {
   return (
@@ -43,16 +47,21 @@ function Home() {
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <CookieBanner />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/hire-engineers" element={<HireEngineers />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/work-policy" element={<WorkPolicy />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <CookieBanner />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/hire-engineers" element={<HireEngineers />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/work-policy" element={<WorkPolicy />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   )
 }
