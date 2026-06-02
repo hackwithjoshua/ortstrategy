@@ -187,7 +187,17 @@
   filter: none !important;
 }
 
+
 .logoItem:has(.logoImgColor) {
+  opacity: 1;
+}
+
+/* SVG logos that swap files per theme — no CSS filter applied */
+.logoImgSvg {
+  filter: none !important;
+}
+
+.logoItem:has(.logoImgSvg) {
   opacity: 1;
 }
 
