@@ -197,7 +197,7 @@ export default function TermsOfService() {
       <h2>15. Contact</h2>
       <p>For questions about these Terms of Service:</p>
       <ul>
-        <li>Email: <a href="mailto:termsofservices@ortstrategy.com">termsofservices@ortstrategy.com</a></li>
+        <li>Email: <a href="mailto:termsofservice@ortstrategy.com">termsofservice@ortstrategy.com</a></li>
         <li>Staffing enquiries: <a href="mailto:hireengineers@ortstrategy.com">hireengineers@ortstrategy.com</a></li>
         <li>Website: <a href="https://ortstrategy.com">ortstrategy.com</a></li>
       </ul>
