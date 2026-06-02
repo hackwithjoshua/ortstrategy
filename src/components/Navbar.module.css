@@ -1,6 +1,6 @@
 .nav {
   position: fixed;
-  top: 0;
+  top: 32px;
   left: 0;
   width: 100%;
   z-index: 1000;
@@ -18,12 +18,11 @@
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
+  width: 100%;
+  padding: 0 60px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
 }
 
 .links {

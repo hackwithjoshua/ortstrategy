@@ -2,7 +2,6 @@
   position: relative;
   padding: 48px 0 64px;
   z-index: 1;
-  overflow: hidden;
 }
 
 .label {
@@ -12,23 +11,103 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
+/* ── Constrain away from screen edges ── */
+.wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* ── Gradient border via padding + gradient background ── */
+.frame {
+  position: relative;
+  padding: 2px;
+  border-radius: 22px;
+  background: linear-gradient(
+    135deg,
+    rgba(29,107,243,0.7) 0%,
+    rgba(0,200,255,0.5) 35%,
+    rgba(79,142,247,0.2) 65%,
+    rgba(0,200,255,0.6) 100%
+  );
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 12px rgba(29,107,243,0.4),
+      0 0 30px rgba(29,107,243,0.2),
+      0 0 60px rgba(0,200,255,0.1),
+      0 -8px 30px rgba(0,200,255,0.15),
+      0 8px 30px rgba(29,107,243,0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(29,107,243,0.7),
+      0 0 50px rgba(29,107,243,0.4),
+      0 0 100px rgba(0,200,255,0.2),
+      0 -16px 50px rgba(0,200,255,0.3),
+      0 16px 50px rgba(29,107,243,0.3);
+  }
+}
+
+/* ── Inner card ── */
+.card {
+  background: rgba(5,14,36,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+[data-theme="light"] .card {
+  background: rgba(240,245,255,0.92);
+}
+
+/* Shimmer line at top */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(79,142,247,0.35), transparent);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Shimmer line at bottom */
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,200,255,0.2), transparent);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ── Track + fades ── */
 .track {
   position: relative;
-  width: 100%;
   overflow: hidden;
 }
 
-/* Fade edges */
 .fade {
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 120px;
-  background: linear-gradient(to right, var(--bg-page), transparent);
+  width: 110px;
+  background: linear-gradient(to right, rgba(5,14,36,1), transparent);
   z-index: 2;
   pointer-events: none;
 }
@@ -38,49 +117,56 @@
   right: 0;
   top: 0;
   bottom: 0;
-  width: 120px;
-  background: linear-gradient(to left, var(--bg-page), transparent);
+  width: 110px;
+  background: linear-gradient(to left, rgba(5,14,36,1), transparent);
   z-index: 2;
   pointer-events: none;
 }
 
+[data-theme="light"] .fade {
+  background: linear-gradient(to right, rgba(240,245,255,1), transparent);
+}
+
+[data-theme="light"] .fadeRight {
+  background: linear-gradient(to left, rgba(240,245,255,1), transparent);
+}
+
+/* ── Marquee ── */
 .marquee {
   overflow: hidden;
   width: 100%;
 }
 
-.inner {
+.marqueeInner {
   display: flex;
   align-items: center;
-  gap: 0;
   width: max-content;
-  animation: scroll 22s linear infinite;
+  animation: scroll 24s linear infinite;
 }
 
-.inner:hover {
+.marqueeInner:hover {
   animation-play-state: paused;
 }
 
 @keyframes scroll {
-  0% { transform: translateX(0); }
+  0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
+/* ── Logo items ── */
 .logoItem {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 48px;
-  height: 64px;
+  padding: 20px 56px;
+  height: 88px;
   opacity: 0.5;
   transition: opacity 0.3s ease;
   flex-shrink: 0;
-  border-right: 1px solid var(--border-card);
+  border-right: 1px solid rgba(79,142,247,0.12);
 }
 
-.logoItem:hover {
-  opacity: 1;
-}
+.logoItem:hover { opacity: 1; }
 
 .logoImg {
   height: 32px;
@@ -105,11 +191,8 @@
   opacity: 1;
 }
 
-.logoText {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  white-space: nowrap;
+@media (max-width: 768px) {
+  .wrapper { padding: 0 20px; }
+  .logoItem { padding: 16px 36px; height: 72px; }
+  .fade, .fadeRight { width: 60px; }
 }

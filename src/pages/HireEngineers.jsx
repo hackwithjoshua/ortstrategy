@@ -15,6 +15,7 @@ import {
   SiAngular, SiSwift, SiApachekafka
 } from 'react-icons/si'
 import HireNavbar from '../components/HireNavbar'
+import RegBanner from '../components/RegBanner'
 import Footer from '../components/Footer'
 import ParticleBackground from '../components/ParticleBackground'
 import styles from './HireEngineers.module.css'
@@ -42,7 +43,7 @@ const steps = [
   {
     num: '03',
     title: 'Trial & Onboard',
-    desc: 'Start with a no-risk 2-week trial. If you\'re happy — which you will be — we kick off the engagement.',
+    desc: 'Start with a no-risk 2-week trial. If you\'re happy, we kick off the engagement.',
     icon: FaCheckCircle,
   },
 ]
@@ -286,6 +287,7 @@ export default function HireEngineers() {
   return (
     <>
       <ParticleBackground />
+      <RegBanner />
       <HireNavbar />
       <main className={styles.main}>
 
@@ -323,8 +325,8 @@ export default function HireEngineers() {
               transition={{ delay: 0.5 }}
             >
               Stop wasting months on bad hires. Ort Strategy gives you
-              battle-tested engineers — vetted for skill, communication, and
-              delivery — embedded in your team and shipping within days.
+              battle-tested engineers, vetted for skill, communication, and
+              delivery, embedded in your team and shipping within days.
             </motion.p>
 
             <motion.div
@@ -373,7 +375,7 @@ export default function HireEngineers() {
             <div className={styles.sectionHeader}>
               <span className={styles.pill}>Tech Stacks</span>
               <h2>Whatever You're <span className={styles.grad}>Building With</span></h2>
-              <p>Our engineers cover the full modern stack — frontend, backend, data, cloud, and security.</p>
+              <p>Our engineers cover the full modern stack: frontend, backend, data, cloud, and security.</p>
             </div>
             <div className={styles.stackGrid}>
               {stacks.map((s, i) => (
@@ -494,7 +496,7 @@ function HireForm() {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        Send Request — We'll Respond in 24 Hours <FaArrowRight style={{ fontSize: '0.8rem' }} />
+        Send Request. We'll Respond in 24 Hours <FaArrowRight style={{ fontSize: '0.8rem' }} />
       </motion.button>
     </form>
   )

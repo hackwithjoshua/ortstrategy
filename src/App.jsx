@@ -2,6 +2,8 @@ import './index.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/Navbar'
+import RegBanner from './components/RegBanner'
+import CookieBanner from './components/CookieBanner'
 import Hero from './components/Hero'
 import About from './components/About'
 import Services from './components/Services'
@@ -15,11 +17,13 @@ import ParticleBackground from './components/ParticleBackground'
 import HireEngineers from './pages/HireEngineers'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
+import WorkPolicy from './pages/WorkPolicy'
 
 function Home() {
   return (
     <>
       <ParticleBackground />
+      <RegBanner />
       <Navbar />
       <main>
         <Hero />
@@ -40,11 +44,13 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <CookieBanner />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/hire-engineers" element={<HireEngineers />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/work-policy" element={<WorkPolicy />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

@@ -1,0 +1,102 @@
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1001;
+  background: linear-gradient(90deg, rgba(2,8,24,0.97) 0%, rgba(15,32,68,0.97) 50%, rgba(2,8,24,0.97) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(79,142,247,0.18);
+}
+
+[data-theme="light"] .banner {
+  background: linear-gradient(90deg, rgba(240,245,255,0.97) 0%, rgba(220,232,255,0.97) 50%, rgba(240,245,255,0.97) 100%);
+  border-bottom: 1px solid rgba(29,107,243,0.15);
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 6px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ── Beating pulse icon ── */
+.iconWrap {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981, 0 0 12px rgba(16,185,129,0.4);
+  display: block;
+  animation: beat 1.4s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+.ring {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  display: block;
+}
+
+@keyframes beat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); box-shadow: 0 0 10px #10b981, 0 0 20px rgba(16,185,129,0.5); }
+}
+
+/* ── Text ── */
+.text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.verified {
+  color: #10b981;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+}
+
+.divider {
+  color: rgba(79,142,247,0.4);
+  font-weight: 300;
+}
+
+.reg {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+.num {
+  color: var(--blue-bright);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-family: var(--font-display);
+}

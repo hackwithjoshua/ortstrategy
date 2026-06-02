@@ -42,16 +42,27 @@ export default function TrustedBy() {
         Trusted by leading companies
       </motion.p>
 
-      <div className={styles.track}>
-        <div className={styles.fade} />
-        <div className={styles.fadeRight} />
-        <div className={styles.marquee}>
-          <div className={styles.inner}>
-            {partners.map((p, i) => (
-              <LogoItem key={i} p={p} />
-            ))}
+      <div className={styles.wrapper}>
+        <motion.div
+          className={styles.frame}
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={inView ? { opacity: 1, scale: 1 } : {}}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <div className={styles.card}>
+            <div className={styles.track}>
+              <div className={styles.fade} />
+              <div className={styles.fadeRight} />
+              <div className={styles.marquee}>
+                <div className={styles.marqueeInner}>
+                  {partners.map((p, i) => (
+                    <LogoItem key={i} p={p} />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

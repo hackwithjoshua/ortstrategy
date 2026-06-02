@@ -3,6 +3,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { FaChevronLeft, FaChevronRight, FaExternalLinkAlt } from 'react-icons/fa'
 import oswImg from '../assets/osw-turing.png'
 import oswVideo from '../assets/osw-demo.mp4'
+import gladeImg from '../assets/gladefinance.png'
 import gladeVideo from '../assets/gladefinance.mp4'
 import styles from './ProjectsCarousel.module.css'
 
@@ -82,6 +83,7 @@ const projects = [
     accent: '#059669',
     tags: ['Stablecoin', 'AI', 'Trade Finance', 'Payments', 'DeFi'],
     mockBg: 'linear-gradient(135deg, #021a10 0%, #052e1a 100%)',
+    image: gladeImg,
     video: gladeVideo,
     link: 'https://gladefinance.co',
   },
@@ -89,17 +91,34 @@ const projects = [
 
 function MockScreen({ project, isActive }) {
   const videoRef = useRef(null)
+  const [showVideo, setShowVideo] = useState(false)
+
+  useEffect(() => {
+    if (!isActive) {
+      setShowVideo(false)
+      if (videoRef.current) videoRef.current.pause()
+      return
+    }
+    // if project has both image and video — show image first for 3s
+    if (project.image && project.video) {
+      setShowVideo(false)
+      const timer = setTimeout(() => setShowVideo(true), 3000)
+      return () => clearTimeout(timer)
+    }
+    // video only — play immediately
+    if (project.video) setShowVideo(true)
+  }, [isActive, project.image, project.video])
 
   useEffect(() => {
     const vid = videoRef.current
     if (!vid) return
-    if (isActive) {
+    if (showVideo && isActive) {
       vid.currentTime = 0
       vid.play().catch(() => {})
     } else {
       vid.pause()
     }
-  }, [isActive])
+  }, [showVideo, isActive])
 
   if (project.video || project.image) {
     return (
@@ -114,19 +133,30 @@ function MockScreen({ project, isActive }) {
             <span style={{ color: project.color1 }}>●</span> {project.url || 'project.ort.io'}
           </div>
         </div>
-        <div className={styles.realScreenshot}>
-          {project.video ? (
-            <video
+        <div className={styles.mediaWrap}>
+          {/* Image layer */}
+          {project.image && (
+            <motion.img
+              src={project.image}
+              alt={project.title}
+              className={styles.mediaItem}
+              animate={{ opacity: showVideo ? 0 : 1 }}
+              transition={{ duration: 0.6 }}
+            />
+          )}
+          {/* Video layer */}
+          {project.video && (
+            <motion.video
               ref={videoRef}
               src={project.video}
-              className={styles.screenshotImg}
+              className={styles.mediaItem}
+              animate={{ opacity: showVideo ? 1 : 0 }}
+              transition={{ duration: 0.6 }}
               loop
               muted
               playsInline
               preload={isActive ? 'auto' : 'none'}
             />
-          ) : (
-            <img src={project.image} alt={project.title} className={styles.screenshotImg} />
           )}
         </div>
       </div>

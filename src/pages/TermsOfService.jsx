@@ -6,7 +6,7 @@ export default function TermsOfService() {
       <div className="highlight-box">
         <p>
           <strong>Please read these Terms carefully.</strong> By engaging Ort Strategy Tech Services
-          for any of our services — including consulting, development, staffing, or any other offering —
+          for any of our services (including consulting, development, staffing, or any other offering),
           you agree to be bound by these Terms of Service.
         </p>
       </div>
@@ -92,7 +92,7 @@ export default function TermsOfService() {
       <h3>6.1 Client-Owned Work Product</h3>
       <p>
         Upon receipt of full payment, all custom deliverables created specifically for the Client
-        under a Statement of Work — including code, designs, and documentation — become the sole
+        under a Statement of Work (including code, designs, and documentation) become the sole
         property of the Client. Ort Strategy retains no rights to such work product.
       </p>
 

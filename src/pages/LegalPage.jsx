@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import Logo from '../components/Logo'
+import ortLogo from '../assets/ort-logo.svg'
 import { useTheme } from '../context/ThemeContext'
 import { FiSun, FiMoon } from 'react-icons/fi'
+import RegBanner from '../components/RegBanner'
 import styles from './LegalPage.module.css'
 
 function ThemeToggle() {
@@ -34,9 +35,10 @@ export default function LegalPage({ title, lastUpdated, children }) {
 
   return (
     <div className={styles.page}>
+      <RegBanner />
       <nav className={styles.nav}>
         <div className={styles.navInner}>
-          <Link to="/"><Logo size={34} showText /></Link>
+          <Link to="/"><img src={ortLogo} alt="ORT Strategy" className={styles.logoImg} /></Link>
           <div className={styles.navRight}>
             <ThemeToggle />
             <Link to="/" className={styles.backBtn}>← Back to OrtStrategy</Link>

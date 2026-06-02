@@ -31,7 +31,7 @@ export default function PrivacyPolicy() {
         <li><strong>Project information:</strong> Service requirements, tech stack details, project timelines, budget ranges</li>
         <li><strong>Hiring requests:</strong> Role requirements, engagement type, timezone preferences, team size</li>
         <li><strong>Communications:</strong> Messages, emails, and notes exchanged during our engagement</li>
-        <li><strong>Billing information:</strong> Processed securely through third-party payment processors — we do not store card data</li>
+        <li><strong>Billing information:</strong> Processed securely through third-party payment processors. We do not store card data</li>
       </ul>
 
       <h3>2.2 Information Collected Automatically</h3>
@@ -75,7 +75,7 @@ export default function PrivacyPolicy() {
         </li>
         <li>
           <strong>Service providers:</strong> Tools we use to operate our business, including EmailJS (email delivery),
-          Firebase (website hosting and infrastructure), and payment processors — all under strict data processing agreements
+          Firebase (website hosting and infrastructure), and payment processors, all under strict data processing agreements
         </li>
         <li>
           <strong>Legal authorities:</strong> Only when required by law, court order, or to protect our legal rights
@@ -130,14 +130,26 @@ export default function PrivacyPolicy() {
         including standard contractual clauses where applicable.
       </p>
 
-      <h2>9. Third-Party Services</h2>
-      <p>Our website and operations use the following third-party services:</p>
+      <h2>9. Cookie Policy</h2>
+      <p>
+        Our website uses cookies and similar technologies to ensure it functions correctly and to
+        improve your experience. We use two categories of cookies:
+      </p>
       <ul>
-        <li><strong>Firebase (Google):</strong> Website hosting and infrastructure — <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a></li>
-        <li><strong>EmailJS:</strong> Contact form email delivery</li>
-        <li><strong>GitHub:</strong> Source code hosting and deployment automation</li>
+        <li>
+          <strong>Essential cookies:</strong> Required for the site to function. These include your
+          theme preference (dark or light mode) and session security. You cannot opt out of these.
+        </li>
+        <li>
+          <strong>Optional cookies:</strong> Used to improve site performance and your experience.
+          These are only set if you click Accept All on our cookie banner. You can withdraw consent
+          at any time by clearing your browser storage.
+        </li>
       </ul>
-      <p>We are not responsible for the privacy practices of these third-party providers.</p>
+      <p>
+        We do not use advertising cookies, cross-site tracking cookies, or sell cookie data to
+        any third party. You can manage or delete cookies at any time via your browser settings.
+      </p>
 
       <h2>10. Children's Privacy</h2>
       <p>
