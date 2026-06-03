@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { FaPlus, FaEdit, FaTrash, FaEye, FaSignOutAlt, FaCheck, FaTimes,
   FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaQuoteRight, FaCode, FaImage } from 'react-icons/fa'
+import { FiSun, FiMoon } from 'react-icons/fi'
+import { useTheme } from '../context/ThemeContext'
 import ortLogo from '../assets/ort-logo.svg'
 import styles from './Admin.module.css'
 
@@ -38,7 +40,7 @@ const TOOLBAR = [
   { icon: FaHeading, label: 'H3', wrap: '### ', block: true, small: true },
   { icon: FaBold,    label: 'Bold',   wrap: '**' },
   { icon: FaItalic,  label: 'Italic', wrap: '*' },
-  { icon: FaCode,    label: 'Code',   wrap: '`' },
+  { icon: FaCode,    label: 'Inline Code', wrap: '`' },
   { icon: FaQuoteRight, label: 'Quote', wrap: '> ', block: true },
   { icon: FaListUl,  label: 'List',   wrap: '- ', block: true },
   { icon: FaListOl,  label: 'Numbered', wrap: '1. ', block: true },
@@ -46,11 +48,13 @@ const TOOLBAR = [
 
 function MarkdownEditor({ value, onChange }) {
   const ref = useRef(null)
+  const imgInputRef = useRef(null)
   const [preview, setPreview] = useState(false)
   const [hasSelection, setHasSelection] = useState(false)
   const [grammar, setGrammar] = useState([])
   const [grammarOpen, setGrammarOpen] = useState(false)
   const [checking, setChecking] = useState(false)
+  const [insertingImg, setInsertingImg] = useState(false)
   const grammarTimer = useRef(null)
 
   // ── Track selection ──
@@ -112,6 +116,36 @@ function MarkdownEditor({ value, onChange }) {
     else toggleWrap(btn.wrap)
   }
 
+  // ── Insert code block at cursor ──
+  const insertCodeBlock = () => {
+    const ta = ref.current
+    if (!ta) return
+    const pos = ta.selectionStart
+    const snippet = '\n\`\`\`\npaste your code here\n\`\`\`\n'
+    const newText = value.slice(0, pos) + snippet + value.slice(pos)
+    onChange(newText)
+    setTimeout(() => { ta.focus(); ta.selectionStart = ta.selectionEnd = pos + 5 }, 10)
+  }
+
+  // ── Insert inline image at cursor — compress hard to keep doc small ──
+  const handleInlineImage = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setInsertingImg(true)
+    try {
+      const dataUrl = await compressImage(file, 1200, 0.88)
+      const ta = ref.current
+      const pos = ta ? ta.selectionStart : value.length
+      const label = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
+      const snippet = `\n![${label}](${dataUrl})\n`
+      onChange(value.slice(0, pos) + snippet + value.slice(pos))
+      setPreview(true) // auto-switch to preview so user sees the image immediately
+    } finally {
+      setInsertingImg(false)
+      e.target.value = ''
+    }
+  }
+
   // ── Keyboard shortcuts ──
   const handleKeyDown = (e) => {
     const mod = e.metaKey || e.ctrlKey
@@ -158,6 +192,8 @@ function MarkdownEditor({ value, onChange }) {
   }
 
   const renderMd = (md) => (md || '')
+    .replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre class="md-code-block"><code>$1</code></pre>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img class="md-inline-img" src="$2" alt="$1" />')
     .replace(/^### (.+)$/gm,'<h3>$1</h3>')
     .replace(/^## (.+)$/gm,'<h2>$1</h2>')
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
@@ -195,6 +231,16 @@ function MarkdownEditor({ value, onChange }) {
         ))}
         <div className={styles.toolbarSep} />
         <span className={styles.toolbarHint}>{hasSelection ? 'Click to toggle' : 'Select text'}</span>
+        <div className={styles.toolbarSep} />
+        {/* Code block — always available */}
+        <button type="button" className={styles.toolbarBtn} onClick={insertCodeBlock} title="Insert code block">
+          <FaCode style={{ fontSize:'0.8rem' }}/><span>Code Block</span>
+        </button>
+        {/* Inline image insert */}
+        <input ref={imgInputRef} type="file" accept="image/*" onChange={handleInlineImage} style={{ display:'none' }}/>
+        <button type="button" className={styles.toolbarBtn} onClick={() => imgInputRef.current?.click()} disabled={insertingImg} title="Insert image">
+          <FaImage style={{ fontSize:'0.8rem' }}/><span>{insertingImg ? 'Compressing...' : 'Image'}</span>
+        </button>
         <div style={{ marginLeft:'auto', display:'flex', gap:'6px', alignItems:'center' }}>
           {grammarCount > 0 && (
             <button
@@ -442,6 +488,26 @@ function PostEditor({ post, onSave, onCancel }) {
   )
 }
 
+function AdminThemeToggle() {
+  const { theme, toggle } = useTheme()
+  const isLight = theme === 'light'
+  return (
+    <motion.button
+      onClick={toggle}
+      whileTap={{ scale: 0.93 }}
+      style={{
+        width: 36, height: 36, borderRadius: 8, cursor: 'pointer',
+        background: 'var(--bg-card)', border: '1px solid var(--border-card)',
+        color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '1rem', transition: 'all 0.2s',
+      }}
+      title="Toggle theme"
+    >
+      {isLight ? <FiMoon /> : <FiSun />}
+    </motion.button>
+  )
+}
+
 export default function Admin() {
   const { user, logout, isSuperAdmin } = useAuth()
   const [posts, setPosts] = useState([])
@@ -453,13 +519,15 @@ export default function Admin() {
 
   const fetchPosts = async () => {
     setLoading(true)
-    const q = query(collection(db,'posts'), orderBy('publishedAt','desc'))
-    const snap = await getDocs(q)
-    setPosts(snap.docs.map(d=>({id:d.id,...d.data()})))
-    setLoading(false)
+    try {
+      const q = query(collection(db,'posts'), orderBy('publishedAt','desc'))
+      const snap = await getDocs(q)
+      setPosts(snap.docs.map(d=>({id:d.id,...d.data()})))
+    } catch(e) { console.error(e) }
+    finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchPosts() }, [])
+  useEffect(() => { if (user) fetchPosts() }, [user])
 
   const handleTogglePublish = async (post) => {
     await updateDoc(doc(db,'posts',post.id), {
@@ -506,6 +574,7 @@ export default function Admin() {
         </div>
         <div className={styles.barRight}>
           <span className={styles.userEmail}>{user.email}</span>
+          <AdminThemeToggle />
           <Link to="/blog" className={styles.viewSiteBtn}><FaEye/> View Blog</Link>
           <button className={styles.logoutBtn} onClick={logout}><FaSignOutAlt/> Logout</button>
         </div>

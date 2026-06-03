@@ -1,0 +1,119 @@
+/* VS Code Dark+ syntax theme for Prism.js — global, not scoped */
+
+.blog-code-wrap {
+  margin: 28px 0;
+  border: 1px solid #3e3e42;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  font-family: 'Cascadia Code','Fira Code','JetBrains Mono',ui-monospace,monospace;
+}
+
+.blog-code-header {
+  background: #252526;
+  padding: 7px 16px;
+  border-bottom: 1px solid #3e3e42;
+  display: flex;
+  align-items: center;
+}
+
+.blog-code-lang {
+  font-family: ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9cdcfe;
+  background: rgba(156,220,254,0.1);
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(156,220,254,0.2);
+}
+
+.blog-code-block {
+  background: #1e1e1e !important;
+  color: #d4d4d4 !important;
+  padding: 16px 20px !important;
+  margin: 0 !important;
+  overflow: auto !important;
+  max-height: 460px !important;
+  font-family: 'Cascadia Code','Fira Code','JetBrains Mono',ui-monospace,monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  overscroll-behavior: contain !important;
+  tab-size: 2 !important;
+  border-radius: 0 !important;
+  text-shadow: none !important;
+}
+
+.blog-code-block code {
+  background: none !important;
+  color: inherit !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  border-radius: 0 !important;
+  white-space: pre !important;
+  text-shadow: none !important;
+  font-family: inherit !important;
+}
+
+/* ── Token colors: VS Code Dark+ ── */
+.blog-code-block .token.comment,
+.blog-code-block .token.prolog,
+.blog-code-block .token.cdata { color: #6a9955; font-style: italic; }
+
+.blog-code-block .token.keyword,
+.blog-code-block .token.rule,
+.blog-code-block .token.important { color: #c586c0; }
+
+.blog-code-block .token.control-flow,
+.blog-code-block .token.keyword.control-flow { color: #c586c0; }
+
+.blog-code-block .token.operator,
+.blog-code-block .token.punctuation { color: #d4d4d4; }
+
+.blog-code-block .token.string,
+.blog-code-block .token.char,
+.blog-code-block .token.attr-value,
+.blog-code-block .token.template-string { color: #ce9178; }
+
+.blog-code-block .token.number,
+.blog-code-block .token.boolean,
+.blog-code-block .token.constant,
+.blog-code-block .token.symbol { color: #b5cea8; }
+
+.blog-code-block .token.function,
+.blog-code-block .token.function-name { color: #dcdcaa; }
+
+.blog-code-block .token.class-name,
+.blog-code-block .token.builtin,
+.blog-code-block .token.type { color: #4ec9b0; }
+
+.blog-code-block .token.variable,
+.blog-code-block .token.parameter,
+.blog-code-block .token.attr-name,
+.blog-code-block .token.property { color: #9cdcfe; }
+
+.blog-code-block .token.namespace,
+.blog-code-block .token.decorator { color: #c586c0; }
+
+.blog-code-block .token.regex { color: #d16969; }
+
+.blog-code-block .token.tag { color: #569cd6; }
+.blog-code-block .token.tag .token.attr-name { color: #9cdcfe; }
+.blog-code-block .token.tag .token.attr-value { color: #ce9178; }
+
+.blog-code-block .token.selector { color: #d7ba7d; }
+.blog-code-block .token.atrule { color: #c586c0; }
+.blog-code-block .token.url { color: #9cdcfe; }
+
+/* Inline image in blog */
+.blog-inline-img {
+  display: block;
+  max-width: 80%;
+  height: auto;
+  margin: 28px auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.08);
+}

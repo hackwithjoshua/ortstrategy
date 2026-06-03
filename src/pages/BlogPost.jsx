@@ -6,6 +6,9 @@ import { db } from '../firebase'
 import { FaArrowLeft, FaTwitter, FaLinkedin, FaLink } from 'react-icons/fa'
 import BlogNavbar from '../components/BlogNavbar'
 import BlogFooter from '../components/BlogFooter'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/vs2015.css'
+hljs.configure({ ignoreUnescapedHTML: true })
 import styles from './BlogPost.module.css'
 
 const GRADIENTS = [
@@ -28,9 +31,53 @@ const formatDate = ts => {
   return d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' })
 }
 
+const LANG_NAMES = {
+  py:'Python', python:'Python', js:'JavaScript', javascript:'JavaScript',
+  ts:'TypeScript', typescript:'TypeScript', jsx:'JSX', tsx:'TSX',
+  java:'Java', cpp:'C++', 'c++':'C++', c:'C', cs:'C#', csharp:'C#',
+  go:'Go', rust:'Rust', rs:'Rust', kotlin:'Kotlin', kt:'Kotlin',
+  swift:'Swift', php:'PHP', ruby:'Ruby', rb:'Ruby',
+  bash:'Shell', sh:'Shell', shell:'Shell', zsh:'Shell',
+  html:'HTML', xml:'XML', css:'CSS', scss:'SCSS',
+  sql:'SQL', json:'JSON', yaml:'YAML', yml:'YAML',
+  docker:'Dockerfile', dockerfile:'Dockerfile',
+  tf:'Terraform', hcl:'HCL', md:'Markdown',
+}
+
+const PRISM_ALIAS = {
+  py:'python', js:'javascript', ts:'typescript', sh:'bash',
+  shell:'bash', zsh:'bash', rs:'rust', kt:'kotlin', rb:'ruby',
+  cs:'csharp', yml:'yaml', 'c++':'cpp', dockerfile:'docker',
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+}
+
 function renderContent(content) {
   if (!content) return ''
-  return content
+
+  // Step 1: Extract code blocks and images into placeholders FIRST
+  // so subsequent markdown transforms don't corrupt them
+  const blocks = []
+  let processed = content.replace(/```([\w+#.-]*)\n?([\s\S]*?)```/g, (_, rawLang, code) => {
+    const lang = (rawLang || '').toLowerCase().trim()
+    const prismLang = PRISM_ALIAS[lang] || lang
+    const displayName = LANG_NAMES[lang] || (lang ? lang.toUpperCase() : 'CODE')
+    const escaped = escapeHtml(code.trim())
+    const html = `<div class="blog-code-wrap"><div class="blog-code-header"><span class="blog-code-lang">${displayName}</span></div><pre class="blog-code-block language-${prismLang || 'text'}"><code class="language-${prismLang || 'text'}">${escaped}</code></pre></div>`
+    blocks.push(html)
+    return `\x00BLOCK${blocks.length - 1}\x00`
+  })
+
+  // Extract inline images too
+  processed = processed.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
+    blocks.push(`<img class="blog-inline-img" src="${src}" alt="${escapeHtml(alt)}" />`)
+    return `\x00BLOCK${blocks.length - 1}\x00`
+  })
+
+  // Step 2: Apply markdown transforms safely
+  processed = processed
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
@@ -41,9 +88,20 @@ function renderContent(content) {
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
     .replace(/\n\n/g, '</p><p>')
-    .replace(/^(?!<[hublc])/gm, '<p>')
+    .replace(/^(?!<[hublcp\x00])/gm, '<p>')
     .replace(/(?<![>])$/gm, '</p>')
     .replace(/<p><\/p>/g, '')
+
+  // Step 3: Strip any <p> tags wrapping block-level placeholders
+  processed = processed
+    .replace(/<p>\s*(\x00BLOCK\d+\x00)\s*<\/p>/g, '$1')
+    .replace(/<\/p>\s*(\x00BLOCK\d+\x00)/g, '</p>$1')
+    .replace(/(\x00BLOCK\d+\x00)\s*<p>/g, '$1<p>')
+
+  // Step 4: Restore code blocks and images
+  processed = processed.replace(/\x00BLOCK(\d+)\x00/g, (_, i) => blocks[+i])
+
+  return processed
 }
 
 export default function BlogPost() {
@@ -70,6 +128,17 @@ export default function BlogPost() {
       finally { setLoading(false) }
     })()
   }, [slug])
+
+  // Syntax highlighting after post content renders
+  useEffect(() => {
+    if (!post) return
+    const timer = setTimeout(() => {
+      document.querySelectorAll('pre.blog-code-block code').forEach(block => {
+        try { hljs.highlightElement(block) } catch(e) {}
+      })
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [post])
 
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href)

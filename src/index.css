@@ -143,3 +143,33 @@ h1, h2, h3, h4, h5, h6 {
 [data-theme="light"] * {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
+
+/* ── hljs VS Code Dark+ overrides ── */
+.blog-code-block .hljs-keyword,
+.blog-code-block .hljs-selector-tag,
+.blog-code-block .hljs-meta-keyword { color: #c586c0 !important; }
+
+.blog-code-block .hljs-comment,
+.blog-code-block .hljs-quote { color: #6a9955 !important; }
+
+.blog-code-block { color: #d4d4d4; }
+.blog-code-block .token.comment,
+.blog-code-block .token.prolog { color: #6a9955 !important; font-style: italic; }
+.blog-code-block .token.keyword { color: #c586c0 !important; }
+.blog-code-block .token.string,
+.blog-code-block .token.attr-value,
+.blog-code-block .token.template-string { color: #ce9178 !important; }
+.blog-code-block .token.number,
+.blog-code-block .token.boolean,
+.blog-code-block .token.constant { color: #b5cea8 !important; }
+.blog-code-block .token.function { color: #dcdcaa !important; }
+.blog-code-block .token.class-name,
+.blog-code-block .token.builtin { color: #4ec9b0 !important; }
+.blog-code-block .token.variable,
+.blog-code-block .token.parameter,
+.blog-code-block .token.attr-name { color: #9cdcfe !important; }
+.blog-code-block .token.operator,
+.blog-code-block .token.punctuation { color: #d4d4d4 !important; }
+.blog-code-block .token.decorator,
+.blog-code-block .token.namespace { color: #c586c0 !important; }
+.blog-code-block .token.regex { color: #d16969 !important; }
