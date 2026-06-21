@@ -279,37 +279,81 @@
 }
 
 /* Table of contents */
+.tocSideCard {
+  border-top: 3px solid var(--blue) !important;
+  border-radius: 0 0 16px 16px !important;
+}
+
 .toc {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 .tocLink {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  font-size: 0.83rem;
+  color: var(--text-primary);
   text-decoration: none;
-  padding: 5px 10px;
-  border-left: 2px solid transparent;
-  border-radius: 0 6px 6px 0;
-  transition: all 0.2s;
-  line-height: 1.4;
+  padding: 7px 12px;
+  border-left: 2px solid var(--border-card);
+  transition: all 0.15s;
+  line-height: 1.45;
   display: block;
 }
 .tocLink:hover {
-  color: var(--text-primary);
-  background: var(--white-10);
-  border-left-color: var(--border-glow);
+  color: var(--blue-bright);
+  border-left-color: var(--blue-bright);
+  background: rgba(29,107,243,0.06);
 }
 .tocSub {
-  padding-left: 20px;
-  font-size: 0.75rem;
-  opacity: 0.8;
+  padding-left: 24px;
+  font-size: 0.77rem;
+  color: var(--text-secondary);
 }
 .tocActive {
   color: var(--blue-bright) !important;
   border-left-color: var(--blue-bright) !important;
-  background: rgba(29,107,243,0.06) !important;
-  font-weight: 600;
+  background: rgba(29,107,243,0.1) !important;
+  font-weight: 700;
+}
+
+/* Mobile inline TOC — shown above article on small screens */
+.mobileToc {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-top: 3px solid var(--blue);
+  border-radius: 0 0 14px 14px;
+  padding: 18px 20px 20px;
+  margin-bottom: 36px;
+}
+.mobileTocLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue-bright);
+  margin-bottom: 12px;
+}
+.mobileTocNav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mobileTocLink {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-card);
+  display: block;
+  transition: color 0.2s;
+}
+.mobileTocLink:last-child { border-bottom: none; }
+.mobileTocLink:hover { color: var(--blue-bright); }
+.mobileTocSub {
+  padding-left: 16px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 /* Author bio at bottom of article */
@@ -478,6 +522,7 @@
   .heroContent { padding: 40px 24px; }
   .relatedContainer { padding: 0 24px; }
   .relatedGrid { grid-template-columns: 1fr; }
+  .mobileToc { display: block; }
 }
 
 @media (max-width: 600px) {

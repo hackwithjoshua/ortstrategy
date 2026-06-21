@@ -305,6 +305,24 @@ export default function BlogPost() {
                 ))}
               </div>
             )}
+
+            {toc.length > 1 && (
+              <div className={styles.mobileToc}>
+                <p className={styles.mobileTocLabel}>On This Page</p>
+                <nav className={styles.mobileTocNav}>
+                  {toc.map(h => (
+                    <a
+                      key={h.id}
+                      href={`#${h.id}`}
+                      className={`${styles.mobileTocLink} ${h.level === 3 ? styles.mobileTocSub : ''}`}
+                    >
+                      {h.text}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            )}
+
             <div
               className={styles.content}
               dangerouslySetInnerHTML={{ __html: renderContent(post.content) }}
@@ -342,7 +360,7 @@ export default function BlogPost() {
           {/* Sidebar */}
           <aside className={styles.sidebar}>
             {toc.length > 1 && (
-              <div className={styles.sideCard}>
+              <div className={`${styles.sideCard} ${styles.tocSideCard}`}>
                 <p className={styles.sideLabel}>On This Page</p>
                 <nav className={styles.toc}>
                   {toc.map(h => (
