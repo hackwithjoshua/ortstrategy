@@ -310,7 +310,12 @@ function MarkdownEditor({ value, onChange }) {
   )
 }
 
-const CATEGORIES = ['DevOps','System Design','Security','Full Stack','Data Engineering','Company']
+const CATEGORIES = [
+  'DevOps','System Design','Security','Full Stack','Data Engineering',
+  'AI & Machine Learning','Cloud & Infrastructure','Opinion',
+  'Business & Strategy','Engineering Culture','Product','Mobile',
+  'Open Source','Tutorial','Case Study','Company',
+]
 
 function slugify(s) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
