@@ -89,18 +89,20 @@
 .ctaBtn:hover { box-shadow: 0 6px 20px rgba(29,107,243,0.5); }
 
 @media (max-width: 600px) {
-  .inner { padding: 0 20px; }
+  .inner { padding: 0 20px; gap: 16px; }
   .siteLink { display: none; }
+}
+
+@media (max-width: 480px) {
+  .ctaBtn { display: none; }
 }
 
 @media (max-width: 420px) {
   .inner { padding: 0 14px; gap: 10px; }
   .blogLabel { display: none; }
   .divider { display: none; }
-  .ctaBtn { font-size: 0.78rem; padding: 7px 12px; }
 }
 
 @media (max-width: 360px) {
-  .ctaBtn { display: none; }
   .logo { height: 36px; }
 }

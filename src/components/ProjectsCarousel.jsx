@@ -116,17 +116,15 @@ function MockScreen({ project, isActive }) {
           </div>
         </div>
         <div className={styles.mediaWrap}>
-          {/* Image layer */}
           {project.image && (
             <motion.img
               src={project.image}
               alt={project.title}
-              className={styles.mediaItem}
+              className={styles.mediaImg}
               animate={{ opacity: showVideo ? 0 : 1 }}
               transition={{ duration: 0.6 }}
             />
           )}
-          {/* Video layer */}
           {project.video && (
             <motion.video
               ref={videoRef}
