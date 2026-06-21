@@ -1,4 +1,5 @@
 import './index.css'
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
@@ -15,13 +16,14 @@ import TrustedBy from './components/TrustedBy'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import ParticleBackground from './components/ParticleBackground'
-import HireEngineers from './pages/HireEngineers'
-import PrivacyPolicy from './pages/PrivacyPolicy'
-import TermsOfService from './pages/TermsOfService'
-import WorkPolicy from './pages/WorkPolicy'
-import Blog from './pages/Blog'
-import BlogPost from './pages/BlogPost'
-import Admin from './pages/Admin'
+
+const HireEngineers = lazy(() => import('./pages/HireEngineers'))
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
+const TermsOfService = lazy(() => import('./pages/TermsOfService'))
+const WorkPolicy = lazy(() => import('./pages/WorkPolicy'))
+const Blog = lazy(() => import('./pages/Blog'))
+const BlogPost = lazy(() => import('./pages/BlogPost'))
+const Admin = lazy(() => import('./pages/Admin'))
 
 function Home() {
   return (
@@ -50,16 +52,18 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <CookieBanner />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/hire-engineers" element={<HireEngineers />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/work-policy" element={<WorkPolicy />} />
-          </Routes>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/hire-engineers" element={<HireEngineers />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/work-policy" element={<WorkPolicy />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

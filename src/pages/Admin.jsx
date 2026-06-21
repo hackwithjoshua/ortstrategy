@@ -509,12 +509,13 @@ function AdminThemeToggle() {
 }
 
 export default function Admin() {
-  const { user, logout, isSuperAdmin } = useAuth()
+  const { user, loading: authLoading, logout, isSuperAdmin } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(null)
   const [creating, setCreating] = useState(false)
 
+  if (authLoading) return <div className={styles.page}><div className={styles.loadWrap}><div className={styles.spinner}/></div></div>
   if (!user) return <LoginPage/>
 
   const fetchPosts = async () => {
