@@ -122,8 +122,8 @@ function renderContent(content) {
   })
 
   processed = processed
-    .replace(/^### (.+)$/gm, (_, t) => `<h3 id="${slugify(t)}">${t}</h3>`)
-    .replace(/^## (.+)$/gm, (_, t) => `<h2 id="${slugify(t)}">${t}</h2>`)
+    .replace(/^### (.+)$/gm, (_, t) => `<h3 id="${slugify(t)}">${t}<a href="#${slugify(t)}" class="blog-heading-anchor">#</a></h3>`)
+    .replace(/^## (.+)$/gm, (_, t) => `<h2 id="${slugify(t)}">${t}<a href="#${slugify(t)}" class="blog-heading-anchor">#</a></h2>`)
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -154,16 +154,18 @@ export default function BlogPost() {
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [showBackTop, setShowBackTop] = useState(false)
   const [activeId, setActiveId] = useState('')
   const [toc, setToc] = useState([])
 
-  // Reading progress bar
+  // Reading progress bar + back-to-top visibility
   useEffect(() => {
     const update = () => {
       const el = document.documentElement
       const scrolled = el.scrollTop
       const total = el.scrollHeight - el.clientHeight
       setProgress(total > 0 ? (scrolled / total) * 100 : 0)
+      setShowBackTop(scrolled > 500)
     }
     window.addEventListener('scroll', update, { passive: true })
     return () => window.removeEventListener('scroll', update)
@@ -308,6 +310,22 @@ export default function BlogPost() {
               dangerouslySetInnerHTML={{ __html: renderContent(post.content) }}
             />
 
+            {/* Bottom share */}
+            <div className={styles.bottomShare}>
+              <p className={styles.bottomShareLabel}>Found this helpful? Share it.</p>
+              <div className={styles.bottomShareBtns}>
+                <a href={`https://twitter.com/intent/tweet?url=${url}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" className={`${styles.bottomShareBtn} ${styles.twitterBtn}`}>
+                  <FaTwitter /> Share on Twitter
+                </a>
+                <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer" className={`${styles.bottomShareBtn} ${styles.linkedinBtn}`}>
+                  <FaLinkedin /> Share on LinkedIn
+                </a>
+                <button className={`${styles.bottomShareBtn} ${copied ? styles.copiedBtn : styles.copyLinkBtn}`} onClick={copyLink}>
+                  <FaLink /> {copied ? 'Link Copied!' : 'Copy Link'}
+                </button>
+              </div>
+            </div>
+
             {/* Author bio */}
             <div className={styles.authorBio}>
               <div className={styles.bioAvatar} style={{ background: gradient }}>
@@ -393,6 +411,16 @@ export default function BlogPost() {
 
       </main>
       <BlogFooter />
+
+      {showBackTop && (
+        <button
+          className={styles.backTop}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Back to top"
+        >
+          ↑
+        </button>
+      )}
     </>
   )
 }
