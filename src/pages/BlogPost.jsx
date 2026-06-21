@@ -81,6 +81,23 @@ const PRISM_ALIAS = {
   cs:'csharp', yml:'yaml', 'c++':'cpp', dockerfile:'docker',
 }
 
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
+}
+
+function extractTOC(content) {
+  if (!content) return []
+  const out = []
+  const re = /^(#{2,3})\s+(.+)$/gm
+  let m
+  while ((m = re.exec(content)) !== null) {
+    const level = m[1].length
+    const text = m[2].trim()
+    out.push({ level, text, id: slugify(text) })
+  }
+  return out
+}
+
 function escapeHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
 }
@@ -88,29 +105,25 @@ function escapeHtml(s) {
 function renderContent(content) {
   if (!content) return ''
 
-  // Step 1: Extract code blocks and images into placeholders FIRST
-  // so subsequent markdown transforms don't corrupt them
   const blocks = []
   let processed = content.replace(/```([\w+#.-]*)\n?([\s\S]*?)```/g, (_, rawLang, code) => {
     const lang = (rawLang || '').toLowerCase().trim()
     const prismLang = PRISM_ALIAS[lang] || lang
     const displayName = LANG_NAMES[lang] || (lang ? lang.toUpperCase() : 'CODE')
     const escaped = escapeHtml(code.trim())
-    const html = `<div class="blog-code-wrap"><div class="blog-code-header"><span class="blog-code-lang">${displayName}</span></div><pre class="blog-code-block language-${prismLang || 'text'}"><code class="language-${prismLang || 'text'}">${escaped}</code></pre></div>`
+    const html = `<div class="blog-code-wrap"><div class="blog-code-header"><span class="blog-code-lang">${displayName}</span><button class="blog-code-copy">Copy</button></div><pre class="blog-code-block language-${prismLang || 'text'}"><code class="language-${prismLang || 'text'}">${escaped}</code></pre></div>`
     blocks.push(html)
     return `\x00BLOCK${blocks.length - 1}\x00`
   })
 
-  // Extract inline images too
   processed = processed.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
     blocks.push(`<img class="blog-inline-img" src="${src}" alt="${escapeHtml(alt)}" />`)
     return `\x00BLOCK${blocks.length - 1}\x00`
   })
 
-  // Step 2: Apply markdown transforms safely
   processed = processed
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^### (.+)$/gm, (_, t) => `<h3 id="${slugify(t)}">${t}</h3>`)
+    .replace(/^## (.+)$/gm, (_, t) => `<h2 id="${slugify(t)}">${t}</h2>`)
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -123,13 +136,11 @@ function renderContent(content) {
     .replace(/(?<![>])$/gm, '</p>')
     .replace(/<p><\/p>/g, '')
 
-  // Step 3: Strip any <p> tags wrapping block-level placeholders
   processed = processed
     .replace(/<p>\s*(\x00BLOCK\d+\x00)\s*<\/p>/g, '$1')
     .replace(/<\/p>\s*(\x00BLOCK\d+\x00)/g, '</p>$1')
     .replace(/(\x00BLOCK\d+\x00)\s*<p>/g, '$1<p>')
 
-  // Step 4: Restore code blocks and images
   processed = processed.replace(/\x00BLOCK(\d+)\x00/g, (_, i) => blocks[+i])
 
   return processed
@@ -142,7 +153,23 @@ export default function BlogPost() {
   const [related, setRelated] = useState([])
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [activeId, setActiveId] = useState('')
+  const [toc, setToc] = useState([])
 
+  // Reading progress bar
+  useEffect(() => {
+    const update = () => {
+      const el = document.documentElement
+      const scrolled = el.scrollTop
+      const total = el.scrollHeight - el.clientHeight
+      setProgress(total > 0 ? (scrolled / total) * 100 : 0)
+    }
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [])
+
+  // Fetch post + related
   useEffect(() => {
     ;(async () => {
       try {
@@ -151,7 +178,7 @@ export default function BlogPost() {
         if (snap.empty) { navigate('/blog'); return }
         const data = { id: snap.docs[0].id, ...snap.docs[0].data() }
         setPost(data)
-        // fetch related posts
+        setToc(extractTOC(data.content))
         const rq = query(collection(db,'posts'), where('published','==',true), where('category','==',data.category), limit(3))
         const rsnap = await getDocs(rq)
         setRelated(rsnap.docs.map(d => ({ id:d.id, ...d.data() })).filter(p => p.slug !== slug))
@@ -160,16 +187,45 @@ export default function BlogPost() {
     })()
   }, [slug])
 
-  // Syntax highlighting after post content renders
+  // Syntax highlight + copy button handlers
   useEffect(() => {
     if (!post) return
     const timer = setTimeout(() => {
       document.querySelectorAll('pre.blog-code-block code').forEach(block => {
         try { hljs.highlightElement(block) } catch(e) {}
       })
+      document.querySelectorAll('.blog-code-copy').forEach(btn => {
+        btn.onclick = () => {
+          const pre = btn.closest('.blog-code-wrap')?.querySelector('pre')
+          if (!pre) return
+          navigator.clipboard.writeText(pre.textContent || '').then(() => {
+            btn.textContent = 'Copied!'
+            btn.classList.add('copied')
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied') }, 2000)
+          }).catch(() => {})
+        }
+      })
     }, 100)
     return () => clearTimeout(timer)
   }, [post])
+
+  // Active heading tracker for TOC
+  useEffect(() => {
+    if (!post || toc.length === 0) return
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) setActiveId(entry.target.id)
+        })
+      },
+      { rootMargin: '-10% 0% -80% 0%', threshold: 0 }
+    )
+    toc.forEach(({ id }) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [post, toc])
 
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -192,6 +248,7 @@ export default function BlogPost() {
   return (
     <>
       <BlogNavbar />
+      <div className={styles.progressBar} style={{ width: `${progress}%` }} />
       <main className={styles.main}>
 
         {/* Hero */}
@@ -250,10 +307,39 @@ export default function BlogPost() {
               className={styles.content}
               dangerouslySetInnerHTML={{ __html: renderContent(post.content) }}
             />
+
+            {/* Author bio */}
+            <div className={styles.authorBio}>
+              <div className={styles.bioAvatar} style={{ background: gradient }}>
+                {post.author?.name?.[0]?.toUpperCase() || 'O'}
+              </div>
+              <div className={styles.bioInfo}>
+                <p className={styles.bioLabel}>Written by</p>
+                <p className={styles.bioName}>{post.author?.name || 'Ort Strategy'}</p>
+                <p className={styles.bioRole}>{post.author?.role || 'Ort Strategy Team'}</p>
+              </div>
+            </div>
           </motion.article>
 
           {/* Sidebar */}
           <aside className={styles.sidebar}>
+            {toc.length > 1 && (
+              <div className={styles.sideCard}>
+                <p className={styles.sideLabel}>On This Page</p>
+                <nav className={styles.toc}>
+                  {toc.map(h => (
+                    <a
+                      key={h.id}
+                      href={`#${h.id}`}
+                      className={`${styles.tocLink} ${h.level === 3 ? styles.tocSub : ''} ${activeId === h.id ? styles.tocActive : ''}`}
+                    >
+                      {h.text}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            )}
+
             <div className={styles.sideCard}>
               <p className={styles.sideLabel}>Written by</p>
               <div className={styles.sideAuthor}>
