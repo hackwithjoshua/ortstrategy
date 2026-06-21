@@ -515,9 +515,6 @@ export default function Admin() {
   const [editing, setEditing] = useState(null)
   const [creating, setCreating] = useState(false)
 
-  if (authLoading) return <div className={styles.page}><div className={styles.loadWrap}><div className={styles.spinner}/></div></div>
-  if (!user) return <LoginPage/>
-
   const fetchPosts = async () => {
     setLoading(true)
     try {
@@ -529,6 +526,9 @@ export default function Admin() {
   }
 
   useEffect(() => { if (user) fetchPosts() }, [user])
+
+  if (authLoading) return <div className={styles.page}><div className={styles.loadWrap}><div className={styles.spinner}/></div></div>
+  if (!user) return <LoginPage/>
 
   const handleTogglePublish = async (post) => {
     await updateDoc(doc(db,'posts',post.id), {
