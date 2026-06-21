@@ -92,3 +92,15 @@
   .inner { padding: 0 20px; }
   .siteLink { display: none; }
 }
+
+@media (max-width: 420px) {
+  .inner { padding: 0 14px; gap: 10px; }
+  .blogLabel { display: none; }
+  .divider { display: none; }
+  .ctaBtn { font-size: 0.78rem; padding: 7px 12px; }
+}
+
+@media (max-width: 360px) {
+  .ctaBtn { display: none; }
+  .logo { height: 36px; }
+}

@@ -276,3 +276,25 @@
   .relatedContainer { padding: 0 24px; }
   .relatedGrid { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 600px) {
+  .hero { min-height: 300px; padding-top: 80px; }
+  .heroContent { padding: 28px 16px; gap: 12px; }
+  .heroTitle { font-size: clamp(1.4rem, 6vw, 2rem); }
+  .heroExcerpt { font-size: 0.9rem; }
+  .layout { padding: 24px 16px 48px; }
+  .related { padding: 40px 0; }
+  .relatedContainer { padding: 0 16px; }
+  .relatedTitle { font-size: 1.3rem; margin-bottom: 20px; }
+  .content { font-size: 0.97rem; }
+}
+
+@media (max-width: 400px) {
+  .heroContent { padding: 20px 14px; }
+  .heroMeta { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .layout { padding: 20px 14px 40px; }
+  .relatedContainer { padding: 0 14px; }
+  .sideCard { padding: 16px; }
+  .shareRow { flex-direction: row; flex-wrap: wrap; }
+  .shareBtn { flex: 1; min-width: 0; justify-content: center; font-size: 0.75rem; padding: 8px 10px; }
+}

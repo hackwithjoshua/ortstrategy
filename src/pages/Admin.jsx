@@ -508,7 +508,37 @@ function AdminThemeToggle() {
   )
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return isMobile
+}
+
+function MobileBlock() {
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', gap: 20,
+      background: 'var(--bg-page)', padding: '32px 24px', textAlign: 'center',
+    }}>
+      <img src={ortLogo} alt="Ort Strategy" style={{ height: 52 }} />
+      <div style={{ fontSize: '3rem' }}>🖥️</div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0 }}>
+        Desktop Only
+      </h2>
+      <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: 300, margin: 0 }}>
+        The admin panel is not available on mobile devices. Please use a tablet or desktop to manage blog posts.
+      </p>
+    </div>
+  )
+}
+
 export default function Admin() {
+  const isMobile = useIsMobile()
   const { user, loading: authLoading, logout, isSuperAdmin } = useAuth()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -527,6 +557,7 @@ export default function Admin() {
 
   useEffect(() => { if (user) fetchPosts() }, [user])
 
+  if (isMobile) return <MobileBlock />
   if (authLoading) return <div className={styles.page}><div className={styles.loadWrap}><div className={styles.spinner}/></div></div>
   if (!user) return <LoginPage/>
 

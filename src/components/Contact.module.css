@@ -344,3 +344,10 @@
   .formWrap { padding: 28px 20px; }
   .row { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 400px) {
+  .section { padding: 60px 14px; }
+  .info { padding: 28px 18px; gap: 24px; border-radius: 18px; }
+  .formWrap { padding: 24px 16px; border-radius: 18px; }
+  .infoTop h3 { font-size: 1.2rem; }
+}

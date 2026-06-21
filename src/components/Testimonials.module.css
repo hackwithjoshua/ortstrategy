@@ -224,3 +224,9 @@
   .cards { grid-template-columns: 1fr; }
   .cards > *:nth-child(2), .cards > *:last-child { display: none; }
 }
+
+@media (max-width: 400px) {
+  .section { padding: 60px 14px; }
+  .card { padding: 24px 18px; border-radius: 18px; }
+  .testimonialText { font-size: 0.88rem; }
+}

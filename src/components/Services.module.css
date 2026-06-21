@@ -254,6 +254,11 @@
   .grid { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 400px) {
+  .section { padding: 60px 14px; }
+  .card { padding: 20px 16px; }
+}
+
 /* Mobile: switch from hover to show more/less */
 @media (max-width: 768px) {
   .hoverHint { display: none; }

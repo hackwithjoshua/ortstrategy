@@ -175,3 +175,11 @@
   .banner { padding: 32px 28px; flex-direction: column; }
   .bannerDeco { display: none; }
 }
+
+@media (max-width: 400px) {
+  .section { padding: 60px 14px; }
+  .banner { padding: 24px 18px; border-radius: 16px; }
+  .bannerText { font-size: 1rem; }
+  .card { padding: 24px 20px; }
+  .cards { gap: 16px; }
+}

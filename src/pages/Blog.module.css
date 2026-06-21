@@ -196,3 +196,13 @@
   .grid { grid-template-columns: 1fr; }
   .featuredCover { height: 300px; }
 }
+@media (max-width: 400px) {
+  .container { padding: 0 14px; }
+  .heroStrip { padding: 40px 0 24px; }
+  .heroTitle { font-size: clamp(1.6rem, 7vw, 2rem); }
+  .featuredCover { height: 240px; padding: 16px; }
+  .featuredTitle { font-size: clamp(1.1rem, 5vw, 1.5rem); }
+  .featuredExcerpt { display: none; }
+  .featuredAuthor { font-size: 0.72rem; gap: 5px; flex-wrap: wrap; }
+  .grid { gap: 16px; }
+}

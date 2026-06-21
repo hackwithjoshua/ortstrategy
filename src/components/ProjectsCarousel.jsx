@@ -5,20 +5,24 @@ import oswImg from '../assets/osw-turing.png'
 import oswVideo from '../assets/osw-demo.mp4'
 import gladeImg from '../assets/gladefinance.png'
 import gladeVideo from '../assets/gladefinance.mp4'
+import cloudNestImg from '../assets/cloudnest.png'
+import secureVaultImg from '../assets/securevault.png'
 import styles from './ProjectsCarousel.module.css'
 
 const projects = [
   {
     id: 1,
-    title: 'CloudNest Platform',
-    category: 'DevOps & Cloud',
-    desc: 'Multi-tenant SaaS infrastructure on AWS with zero-downtime deployments, auto-scaling, and 99.99% uptime SLA.',
+    title: 'Cloud-Nest',
+    category: 'IoT & Data Engineering',
+    url: 'cloud-nest.in',
+    link: 'https://cloud-nest.in',
+    desc: 'Centralized IoT device management & real-time visualization platform. Connect, store, and analyze your entire sensor ecosystem — from ESP32 to industrial PLCs — with sub-20ms telemetry and a developer-first dashboard.',
     color1: '#1d6bf3',
     color2: '#00c8ff',
     accent: '#4f8ef7',
-    tags: ['Kubernetes', 'Terraform', 'AWS', 'CI/CD'],
+    tags: ['IoT', 'MQTT', 'WebSockets', 'Time-Series DB', 'ESP32'],
     mockBg: 'linear-gradient(135deg, #0a1628 0%, #0f2044 100%)',
-    link: null,
+    image: cloudNestImg,
   },
   {
     id: 2,
@@ -37,39 +41,17 @@ const projects = [
   },
   {
     id: 3,
-    title: 'SecureVault Dashboard',
-    category: 'Security Consultation',
-    desc: 'Enterprise-grade security audit dashboard with real-time threat detection, SIEM integration, and compliance reporting.',
+    title: 'SecureVault',
+    category: 'Security & Full Stack',
+    url: 'securevault.live',
+    link: 'https://securevault.live',
+    desc: 'The ultimate password manager — AES-256 & PBKDF2 SHA-256 encrypted credential storage with cloud sync or self-hosting options. Enterprise-grade SLAs with ShieldX Cloud, built for teams and power users who take privacy seriously.',
     color1: '#7c3aed',
     color2: '#c084fc',
     accent: '#a855f7',
-    tags: ['SIEM', 'SOC2', 'React', 'Node.js'],
+    tags: ['AES-256', 'PBKDF2', 'Self-hosted', 'React', 'Node.js'],
     mockBg: 'linear-gradient(135deg, #1a0a28 0%, #2d1054 100%)',
-    link: null,
-  },
-  {
-    id: 4,
-    title: 'TradeFlow System',
-    category: 'System Design',
-    desc: 'High-frequency trading platform processing 2M events/sec with microsecond latency and distributed consensus.',
-    color1: '#10b981',
-    color2: '#34d399',
-    accent: '#059669',
-    tags: ['Kafka', 'gRPC', 'Redis', 'Go'],
-    mockBg: 'linear-gradient(135deg, #061a12 0%, #0a2e1e 100%)',
-    link: null,
-  },
-  {
-    id: 5,
-    title: 'HealthPulse App',
-    category: 'Full Stack Development',
-    desc: 'HIPAA-compliant telehealth platform connecting 50k+ patients with real-time video consultation and AI diagnostics.',
-    color1: '#ef4444',
-    color2: '#f87171',
-    accent: '#dc2626',
-    tags: ['Next.js', 'WebRTC', 'Python', 'PostgreSQL'],
-    mockBg: 'linear-gradient(135deg, #1a0505 0%, #2e0808 100%)',
-    link: null,
+    image: secureVaultImg,
   },
   {
     id: 6,
