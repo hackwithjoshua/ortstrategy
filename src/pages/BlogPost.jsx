@@ -192,9 +192,9 @@ export default function BlogPost() {
         const data = { id: snap.docs[0].id, ...snap.docs[0].data() }
         setPost(data)
         setToc(extractTOC(data.content))
-        const rq = query(collection(db,'posts'), where('published','==',true), where('category','==',data.category), limit(3))
+        const rq = query(collection(db,'posts'), where('published','==',true), where('category','==',data.category), limit(4))
         const rsnap = await getDocs(rq)
-        setRelated(rsnap.docs.map(d => ({ id:d.id, ...d.data() })).filter(p => p.slug !== slug))
+        setRelated(rsnap.docs.map(d => ({ id:d.id, ...d.data() })).filter(p => p.slug !== slug).slice(0, 3))
       } catch(e) { console.error(e) }
       finally { setLoading(false) }
     })()
@@ -439,18 +439,40 @@ export default function BlogPost() {
         {related.length > 0 && (
           <div className={styles.related}>
             <div className={styles.relatedContainer}>
-              <h2 className={styles.relatedTitle}>More from <span className={styles.grad}>Ort Strategy</span></h2>
+              <div className={styles.relatedHeader}>
+                <h2 className={styles.relatedTitle}>Related <span className={styles.grad}>Articles</span></h2>
+                <Link to="/blog" className={styles.relatedViewAll}>View all posts →</Link>
+              </div>
               <div className={styles.relatedGrid}>
-                {related.slice(0,2).map(p => (
-                  <Link key={p.id} to={`/blog/${p.slug}`} className={styles.relatedCard}>
-                    <div className={styles.relatedCover} style={{ background: GRADIENTS[p.title?.length % GRADIENTS.length] }} />
-                    <div className={styles.relatedBody}>
-                      <span className={styles.relatedCat}>{p.category}</span>
-                      <h3>{p.title}</h3>
-                      <p>{p.excerpt}</p>
-                    </div>
-                  </Link>
-                ))}
+                {related.map((p, i) => {
+                  const rGrad = GRADIENTS[p.title?.length % GRADIENTS.length]
+                  const rColor = CAT_COLORS[p.category] || '#1d6bf3'
+                  return (
+                    <Link key={p.id} to={`/blog/${p.slug}`} className={styles.relatedCard}>
+                      <div
+                        className={styles.relatedCover}
+                        style={{ background: p.coverImage ? `url(${p.coverImage}) center/cover no-repeat` : rGrad }}
+                      >
+                        <div className={styles.relatedCoverOverlay} />
+                        <span className={styles.relatedCatBadge} style={{ background:`${rColor}28`, color: rColor, border:`1px solid ${rColor}55` }}>
+                          {p.category}
+                        </span>
+                      </div>
+                      <div className={styles.relatedBody}>
+                        <h3 className={styles.relatedPostTitle}>{p.title}</h3>
+                        {p.excerpt && <p className={styles.relatedExcerpt}>{p.excerpt}</p>}
+                        <div className={styles.relatedMeta}>
+                          <div className={styles.relatedAvatar} style={{ background: rGrad }}>
+                            {p.author?.name?.[0]?.toUpperCase() || 'O'}
+                          </div>
+                          <span className={styles.relatedAuthorName}>{p.author?.name || 'Ort Strategy'}</span>
+                          <span className={styles.relatedSep}>·</span>
+                          <span className={styles.relatedReadTime}>{readTime(p.content)} min read</span>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           </div>

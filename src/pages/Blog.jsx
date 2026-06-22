@@ -312,7 +312,22 @@ export default function Blog() {
           )}
 
           {loading ? (
-            <div className={styles.center}><div className={styles.spinner}/></div>
+            <div className={styles.skeletonWrap}>
+              <div className={styles.skeletonFeatured} />
+              <div className={styles.skeletonGrid}>
+                {[...Array(6)].map((_,i) => (
+                  <div key={i} className={styles.skeletonCard}>
+                    <div className={styles.skeletonCover} />
+                    <div className={styles.skeletonBody}>
+                      <div className={styles.skeletonLine} style={{ width:'40%', height:'10px' }} />
+                      <div className={styles.skeletonLine} style={{ width:'90%', height:'16px' }} />
+                      <div className={styles.skeletonLine} style={{ width:'75%', height:'16px' }} />
+                      <div className={styles.skeletonLine} style={{ width:'60%', height:'12px', marginTop:'4px' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : visible.length === 0 ? (
             <div className={styles.empty}>
               <span>✍️</span>

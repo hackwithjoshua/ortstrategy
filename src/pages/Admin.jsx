@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   collection, addDoc, updateDoc, deleteDoc,
-  doc, query, orderBy, getDocs, serverTimestamp
+  doc, query, orderBy, where, getDocs, serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { FaPlus, FaEdit, FaTrash, FaEye, FaSignOutAlt, FaCheck, FaTimes,
-  FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaQuoteRight, FaCode, FaImage } from 'react-icons/fa'
+  FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaQuoteRight, FaCode, FaImage,
+  FaList, FaTh } from 'react-icons/fa'
 import { FiSun, FiMoon } from 'react-icons/fi'
 import { useTheme } from '../context/ThemeContext'
 import ortLogo from '../assets/ort-logo.svg'
@@ -46,7 +47,7 @@ const TOOLBAR = [
   { icon: FaListOl,  label: 'Numbered', wrap: '1. ', block: true },
 ]
 
-function MarkdownEditor({ value, onChange }) {
+function MarkdownEditor({ value, onChange, onOpenLibrary }) {
   const ref = useRef(null)
   const imgInputRef = useRef(null)
   const [preview, setPreview] = useState(false)
@@ -238,7 +239,24 @@ function MarkdownEditor({ value, onChange }) {
         </button>
         {/* Inline image insert */}
         <input ref={imgInputRef} type="file" accept="image/*" onChange={handleInlineImage} style={{ display:'none' }}/>
-        <button type="button" className={styles.toolbarBtn} onClick={() => imgInputRef.current?.click()} disabled={insertingImg} title="Insert image">
+        <button
+          type="button"
+          className={styles.toolbarBtn}
+          onClick={() => {
+            if (onOpenLibrary) {
+              onOpenLibrary((dataUrl) => {
+                const ta = ref.current
+                const pos = ta ? ta.selectionStart : value.length
+                onChange(value.slice(0, pos) + `\n![image](${dataUrl})\n` + value.slice(pos))
+                setPreview(true)
+              })
+            } else {
+              imgInputRef.current?.click()
+            }
+          }}
+          disabled={insertingImg}
+          title="Insert image"
+        >
           <FaImage style={{ fontSize:'0.8rem' }}/><span>{insertingImg ? 'Compressing...' : 'Image'}</span>
         </button>
         <div style={{ marginLeft:'auto', display:'flex', gap:'6px', alignItems:'center' }}>
@@ -317,6 +335,13 @@ const CATEGORIES = [
   'Open Source','Tutorial','Case Study','Company',
 ]
 
+const GRADIENTS = [
+  'linear-gradient(135deg,#1d6bf3 0%,#00c8ff 100%)',
+  'linear-gradient(135deg,#7c3aed 0%,#c084fc 100%)',
+  'linear-gradient(135deg,#10b981 0%,#34d399 100%)',
+  'linear-gradient(135deg,#f97316 0%,#fbbf24 100%)',
+]
+
 function slugify(s) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
 }
@@ -363,9 +388,89 @@ function LoginPage() {
   )
 }
 
+function ImageLibraryModal({ userEmail, onSelect, onClose }) {
+  const [images, setImages] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef(null)
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const q = query(collection(db, 'posts'), where('author.email', '==', userEmail))
+        const snap = await getDocs(q)
+        const imgs = []
+        snap.docs.forEach(d => {
+          const data = d.data()
+          if (data.coverImage) imgs.push({ src: data.coverImage, label: data.title || 'Cover' })
+          const re = /!\[([^\]]*)\]\((data:image[^)]+)\)/g
+          let m
+          while ((m = re.exec(data.content || '')) !== null) {
+            imgs.push({ src: m[2], label: m[1] || 'Inline image' })
+          }
+        })
+        const seen = new Set()
+        setImages(imgs.reverse().filter(img => {
+          const key = img.src.slice(0, 80)
+          if (seen.has(key)) return false
+          seen.add(key)
+          return true
+        }))
+      } catch(e) { console.error(e) }
+      finally { setLoading(false) }
+    })()
+  }, [userEmail])
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const dataUrl = await compressImage(file, 1200, 0.88)
+      onSelect(dataUrl)
+    } finally { setUploading(false); e.target.value = '' }
+  }
+
+  return (
+    <div className={styles.libraryOverlay} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className={styles.libraryModal}>
+        <div className={styles.libraryHeader}>
+          <div>
+            <h3 className={styles.libraryTitle}>Image Library</h3>
+            <p className={styles.librarySub}>Upload a new image or pick from previously uploaded ones</p>
+          </div>
+          <button type="button" className={styles.libraryClose} onClick={onClose}><FaTimes /></button>
+        </div>
+
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} style={{ display:'none' }} />
+        <button type="button" className={styles.libraryUploadBtn} onClick={() => fileRef.current?.click()} disabled={uploading}>
+          <FaImage /> {uploading ? 'Uploading...' : 'Upload from System'}
+        </button>
+
+        <div className={styles.librarySectionWrap}>
+          <p className={styles.librarySectionLabel}>Recently Uploaded</p>
+          {loading ? (
+            <div className={styles.libraryLoading}><div className={styles.spinner} /></div>
+          ) : images.length === 0 ? (
+            <p className={styles.libraryEmpty}>No images uploaded yet. Use the button above to upload one.</p>
+          ) : (
+            <div className={styles.libraryGrid}>
+              {images.map((img, i) => (
+                <button key={i} type="button" className={styles.libraryItem} onClick={() => onSelect(img.src)} title={img.label}>
+                  <img src={img.src} alt={img.label} className={styles.libraryImg} />
+                  <span className={styles.libraryItemLabel}>{img.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PostEditor({ post, onSave, onCancel }) {
   const { user } = useAuth()
-  const imgRef = useRef(null)
   const [form, setForm] = useState({
     title: post?.title || '',
     slug: post?.slug || '',
@@ -378,17 +483,12 @@ function PostEditor({ post, onSave, onCancel }) {
     authorName: post?.author?.name || '',
   })
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [libraryCallback, setLibraryCallback] = useState(null)
+  const isAuthor = !post || !post.author?.email || post.author?.email === user.email
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    try {
-      const compressed = await compressImage(file, 1200, 0.8)
-      set('coverImage', compressed)
-    } finally { setUploading(false) }
-  }
+  const openLibrary = (cb) => setLibraryCallback(() => cb)
+  const closeLibrary = () => setLibraryCallback(null)
+  const handleLibrarySelect = (url) => { libraryCallback(url); closeLibrary() }
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -401,11 +501,12 @@ function PostEditor({ post, onSave, onCancel }) {
     if (!form.title || !form.content) return
     setSaving(true)
     try {
+      const { authorName, ...formData } = form
       const data = {
-        ...form,
+        ...formData,
         tags: form.tags.split(',').map(t=>t.trim()).filter(Boolean),
         author: {
-          name: form.authorName.trim() || user.displayName || 'Ort Strategy',
+          name: authorName.trim() || user.displayName || 'Ort Strategy',
           role: 'Ort Strategy Team',
           email: user.email,
         },
@@ -424,6 +525,7 @@ function PostEditor({ post, onSave, onCancel }) {
   }
 
   return (
+    <>
     <div className={styles.editor}>
       <div className={styles.editorHeader}>
         <h2>{post ? 'Edit Post' : 'New Post'}</h2>
@@ -454,17 +556,19 @@ function PostEditor({ post, onSave, onCancel }) {
           </div>
           <div className={styles.field}>
             <label>Content *</label>
-            <MarkdownEditor value={form.content} onChange={v => set('content', v)} />
+            <MarkdownEditor value={form.content} onChange={v => set('content', v)} onOpenLibrary={openLibrary} />
           </div>
         </div>
 
         <div className={styles.editorSide}>
           <div className={styles.sideSection}>
-            <label>Author Name</label>
+            <label>Author Name {!isAuthor && <span className={styles.lockedHint}>— only the original author can change this</span>}</label>
             <input
               value={form.authorName}
               onChange={e => set('authorName', e.target.value)}
               placeholder={user.displayName || 'Ort Strategy'}
+              disabled={!isAuthor}
+              style={!isAuthor ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
             />
           </div>
 
@@ -488,9 +592,8 @@ function PostEditor({ post, onSave, onCancel }) {
           </div>
           <div className={styles.sideSection}>
             <label>Cover Image</label>
-            <input ref={imgRef} type="file" accept="image/*" onChange={handleImageUpload} className={styles.fileInput} />
-            <button type="button" className={styles.uploadBtn} onClick={() => imgRef.current?.click()} disabled={uploading}>
-              <FaImage /> {uploading ? 'Compressing...' : form.coverImage ? 'Change Image' : 'Upload Image'}
+            <button type="button" className={styles.uploadBtn} onClick={() => openLibrary(url => set('coverImage', url))}>
+              <FaImage /> {form.coverImage ? 'Change Image' : 'Upload Image'}
             </button>
             {form.coverImage && (
               <div className={styles.imagePreviewWrap}>
@@ -504,6 +607,15 @@ function PostEditor({ post, onSave, onCancel }) {
         </div>
       </div>
     </div>
+
+    {libraryCallback && (
+      <ImageLibraryModal
+        userEmail={user.email}
+        onSelect={handleLibrarySelect}
+        onClose={closeLibrary}
+      />
+    )}
+  </>
   )
 }
 
@@ -563,6 +675,8 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(null)
   const [creating, setCreating] = useState(false)
+  const [viewMode, setViewMode] = useState('list')
+  const [expandedTitle, setExpandedTitle] = useState(null)
 
   const fetchPosts = async () => {
     setLoading(true)
@@ -626,7 +740,7 @@ export default function Admin() {
         <div className={styles.barRight}>
           <span className={styles.userEmail}>{user.email}</span>
           <AdminThemeToggle />
-          <Link to="/blog" className={styles.viewSiteBtn}><FaEye/> View Blog</Link>
+          <Link to="/blog" className={styles.viewSiteBtn} target="_blank" rel="noopener noreferrer"><FaEye/> View Blog</Link>
           <button className={styles.logoutBtn} onClick={logout}><FaSignOutAlt/> Logout</button>
         </div>
       </div>
@@ -637,9 +751,15 @@ export default function Admin() {
             <h1 className={styles.dashTitle}>Posts</h1>
             <p className={styles.dashSub}>{posts.length} total · {posts.filter(p=>p.published).length} published</p>
           </div>
-          <button className={styles.newBtn} onClick={() => setCreating(true)}>
-            <FaPlus/> New Post
-          </button>
+          <div className={styles.dashHeaderRight}>
+            <div className={styles.viewToggle}>
+              <button className={`${styles.viewToggleBtn} ${viewMode==='list'?styles.viewToggleActive:''}`} onClick={()=>setViewMode('list')} title="List view"><FaList/></button>
+              <button className={`${styles.viewToggleBtn} ${viewMode==='grid'?styles.viewToggleActive:''}`} onClick={()=>setViewMode('grid')} title="Grid view"><FaTh/></button>
+            </div>
+            <button className={styles.newBtn} onClick={() => setCreating(true)}>
+              <FaPlus/> New Post
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -651,7 +771,7 @@ export default function Admin() {
             <p>Create your first post to get started.</p>
             <button className={styles.newBtn} onClick={() => setCreating(true)}><FaPlus/> Create Post</button>
           </div>
-        ) : (
+        ) : viewMode === 'list' ? (
           <div className={styles.postList}>
             {posts.map(post => (
               <motion.div key={post.id} className={styles.postRow} layout initial={{opacity:0}} animate={{opacity:1}}>
@@ -681,6 +801,46 @@ export default function Admin() {
                 </div>
               </motion.div>
             ))}
+          </div>
+        ) : (
+          <div className={styles.postGrid}>
+            {posts.map(post => {
+              const grad = GRADIENTS[post.title?.length % GRADIENTS.length]
+              const isExpanded = expandedTitle === post.id
+              return (
+                <motion.div key={post.id} className={styles.gridCard} layout initial={{opacity:0}} animate={{opacity:1}}>
+                  <div className={styles.gridCover} style={{ background: post.coverImage ? `url(${post.coverImage}) center/cover` : grad }}>
+                    <div className={styles.gridCoverOverlay} />
+                    <span className={`${styles.gridStatusDot} ${post.published ? styles.live : styles.draft}`} />
+                    <span className={styles.gridCat}>{post.category}</span>
+                  </div>
+                  <div className={styles.gridBody}>
+                    <p
+                      className={`${styles.gridTitle} ${isExpanded ? styles.gridTitleExpanded : ''}`}
+                      onClick={() => setExpandedTitle(isExpanded ? null : post.id)}
+                      title={isExpanded ? 'Click to collapse' : 'Click to expand'}
+                    >
+                      {post.title}
+                    </p>
+                    <p className={styles.gridMeta}>{formatDate(post.publishedAt)}</p>
+                    <div className={styles.gridActions}>
+                      <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
+                      <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
+                      <button
+                        className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
+                        onClick={() => handleTogglePublish(post)}
+                        title={post.published ? 'Unpublish' : 'Publish'}
+                      >
+                        {post.published ? '⏸' : '🚀'}
+                      </button>
+                      {isSuperAdmin && (
+                        <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })}
           </div>
         )}
       </div>
