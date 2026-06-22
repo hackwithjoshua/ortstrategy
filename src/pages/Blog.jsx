@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useInView } from 'framer-motion'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
@@ -22,6 +22,19 @@ const CAT_COLORS = {
 }
 
 const readTime = content => Math.max(1, Math.ceil((content?.split(' ').length || 0) / 200))
+
+function Highlight({ text, query }) {
+  if (!query || !text) return text
+  const idx = text.toLowerCase().indexOf(query.toLowerCase())
+  if (idx === -1) return text
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className={styles.mark}>{text.slice(idx, idx + query.length)}</mark>
+      {text.slice(idx + query.length)}
+    </>
+  )
+}
 
 const formatDate = ts => {
   if (!ts) return ''
@@ -71,6 +84,7 @@ function FeaturedCard({ post }) {
 function PostCard({ post, i }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-40px' })
+  const navigate = useNavigate()
   const gradient = GRADIENTS[i % GRADIENTS.length]
   const color = CAT_COLORS[post.category] || '#1d6bf3'
   return (
@@ -92,7 +106,15 @@ function PostCard({ post, i }) {
           <p className={styles.cardExcerpt}>{post.excerpt}</p>
           {post.tags?.length > 0 && (
             <div className={styles.tagRow}>
-              {post.tags.slice(0,3).map(t => <span key={t} className={styles.tag}>{t}</span>)}
+              {post.tags.slice(0,3).map(t => (
+                <span
+                  key={t}
+                  className={`${styles.tag} ${styles.tagLink}`}
+                  onClick={e => { e.preventDefault(); e.stopPropagation(); navigate(`/blog?tag=${encodeURIComponent(t)}`) }}
+                >
+                  {t}
+                </span>
+              ))}
             </div>
           )}
           <div className={styles.cardMeta}>
@@ -118,6 +140,12 @@ export default function Blog() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [cat, setCat] = useState('All')
+  const [searchQ, setSearchQ] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const searchRef = useRef(null)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const activeTag = new URLSearchParams(location.search).get('tag') || ''
 
   useEffect(() => {
     ;(async () => {
@@ -136,8 +164,39 @@ export default function Blog() {
     })()
   }, [])
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = e => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) setSearchOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const searchResults = searchQ.trim().length > 0
+    ? posts.filter(p => {
+        const q = searchQ.toLowerCase()
+        return (
+          p.title?.toLowerCase().includes(q) ||
+          p.excerpt?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
+          p.tags?.some(t => t.toLowerCase().includes(q))
+        )
+      }).slice(0, 6)
+    : []
+
+  const handleSearchKey = e => {
+    if (e.key === 'Escape') { setSearchOpen(false); setSearchQ('') }
+    if (e.key === 'Enter' && searchResults.length > 0) {
+      navigate(`/blog/${searchResults[0].slug}`)
+      setSearchOpen(false); setSearchQ('')
+    }
+  }
+
   const cats = ['All', ...new Set(posts.map(p => p.category).filter(Boolean))]
-  const visible = cat === 'All' ? posts : posts.filter(p => p.category === cat)
+  const visible = posts
+    .filter(p => cat === 'All' || p.category === cat)
+    .filter(p => !activeTag || p.tags?.includes(activeTag))
   const [featured, ...rest] = visible
 
   return (
@@ -164,10 +223,83 @@ export default function Blog() {
             >
               Engineering insights, deep dives, and stories from the team.
             </motion.p>
+
+            {/* Search bar */}
+            <motion.div
+              className={styles.searchWrap}
+              ref={searchRef}
+              initial={{ opacity:0, y:10 }}
+              animate={{ opacity:1, y:0 }}
+              transition={{ delay:0.35 }}
+            >
+              <div className={`${styles.searchBar} ${searchOpen ? styles.searchBarFocus : ''}`}>
+                <svg className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input
+                  className={styles.searchInput}
+                  type="text"
+                  placeholder="Search articles, topics, tags…"
+                  value={searchQ}
+                  onChange={e => { setSearchQ(e.target.value); setSearchOpen(true) }}
+                  onFocus={() => setSearchOpen(true)}
+                  onKeyDown={handleSearchKey}
+                  autoComplete="off"
+                />
+                {searchQ && (
+                  <button className={styles.searchClear} onClick={() => { setSearchQ(''); setSearchOpen(false) }} aria-label="Clear">
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {searchOpen && searchQ.trim() && (
+                <div className={styles.searchDropdown}>
+                  {searchResults.length === 0 ? (
+                    <div className={styles.searchEmpty}>No results for "<strong>{searchQ}</strong>"</div>
+                  ) : (
+                    searchResults.map(p => (
+                      <Link
+                        key={p.id}
+                        to={`/blog/${p.slug}`}
+                        className={styles.searchResult}
+                        onClick={() => { setSearchOpen(false); setSearchQ('') }}
+                      >
+                        <div className={styles.searchResultTop}>
+                          <span className={styles.searchResultCat}>{p.category}</span>
+                          <span className={styles.searchResultTime}>{readTime(p.content)} min read</span>
+                        </div>
+                        <p className={styles.searchResultTitle}>
+                          <Highlight text={p.title} query={searchQ} />
+                        </p>
+                        {p.excerpt && (
+                          <p className={styles.searchResultExcerpt}>
+                            <Highlight text={p.excerpt} query={searchQ} />
+                          </p>
+                        )}
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
+            </motion.div>
           </div>
         </div>
 
         <div className={styles.container}>
+          {/* Active tag chip */}
+          {activeTag && (
+            <div className={styles.tagFilterRow}>
+              <span className={styles.tagFilterChip}>
+                #{activeTag}
+                <button className={styles.tagFilterClear} onClick={() => navigate('/blog')} aria-label="Clear tag filter">×</button>
+              </span>
+              <span className={styles.tagFilterLabel}>
+                {visible.length} post{visible.length !== 1 ? 's' : ''} with this tag
+              </span>
+            </div>
+          )}
+
           {/* Category filters */}
           {cats.length > 2 && (
             <div className={styles.filters}>

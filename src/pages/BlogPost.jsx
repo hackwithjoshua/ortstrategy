@@ -85,6 +85,17 @@ function slugify(text) {
   return text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
 }
 
+function splitHtmlAtParagraph(html, n) {
+  let count = 0, idx = 0
+  while (count < n) {
+    const next = html.indexOf('</p>', idx)
+    if (next === -1) break
+    idx = next + 4
+    count++
+  }
+  return [html.slice(0, idx), html.slice(idx)]
+}
+
 function extractTOC(content) {
   if (!content) return []
   const out = []
@@ -301,7 +312,9 @@ export default function BlogPost() {
             {post.tags?.length > 0 && (
               <div className={styles.tagRow}>
                 {post.tags.map(t => (
-                  <span key={t} className={styles.tag}>{t}</span>
+                  <Link key={t} to={`/blog?tag=${encodeURIComponent(t)}`} className={styles.tag}>
+                    {t}
+                  </Link>
                 ))}
               </div>
             )}
@@ -323,10 +336,26 @@ export default function BlogPost() {
               </div>
             )}
 
-            <div
-              className={styles.content}
-              dangerouslySetInnerHTML={{ __html: renderContent(post.content) }}
-            />
+            {(() => {
+              const [top, bottom] = splitHtmlAtParagraph(renderContent(post.content), 3)
+              return (
+                <>
+                  <div className={styles.content} dangerouslySetInnerHTML={{ __html: top }} />
+                  <div className={styles.readOtherWrap}>
+                    <p className={styles.readOtherText}>Enjoying this? There's plenty more to read.</p>
+                    <a
+                      href="/blog"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.readOtherBtn}
+                    >
+                      Explore More Articles →
+                    </a>
+                  </div>
+                  {bottom && <div className={styles.content} dangerouslySetInnerHTML={{ __html: bottom }} />}
+                </>
+              )
+            })()}
 
             {/* Bottom share */}
             <div className={styles.bottomShare}>

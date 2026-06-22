@@ -375,6 +375,7 @@ function PostEditor({ post, onSave, onCancel }) {
     content: post?.content || '',
     coverImage: post?.coverImage || '',
     published: post?.published ?? false,
+    authorName: post?.author?.name || '',
   })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -403,7 +404,11 @@ function PostEditor({ post, onSave, onCancel }) {
       const data = {
         ...form,
         tags: form.tags.split(',').map(t=>t.trim()).filter(Boolean),
-        author: { name: user.displayName || 'Ort Strategy', email: user.email },
+        author: {
+          name: form.authorName.trim() || user.displayName || 'Ort Strategy',
+          role: 'Ort Strategy Team',
+          email: user.email,
+        },
         updatedAt: serverTimestamp(),
       }
       if (!post) {
@@ -454,6 +459,15 @@ function PostEditor({ post, onSave, onCancel }) {
         </div>
 
         <div className={styles.editorSide}>
+          <div className={styles.sideSection}>
+            <label>Author Name</label>
+            <input
+              value={form.authorName}
+              onChange={e => set('authorName', e.target.value)}
+              placeholder={user.displayName || 'Ort Strategy'}
+            />
+          </div>
+
           <div className={styles.sideSection}>
             <label>URL Slug</label>
             <input value={form.slug} onChange={e=>set('slug',e.target.value)} placeholder="post-url-slug"/>
@@ -652,7 +666,7 @@ export default function Admin() {
                   </div>
                 </div>
                 <div className={styles.postActions}>
-                  <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview"><FaEye/></Link>
+                  <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
                   <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
                   <button
                     className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
