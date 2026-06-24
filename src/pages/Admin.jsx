@@ -508,7 +508,7 @@ function PostEditor({ post, onSave, onCancel }) {
         author: {
           name: authorName.trim() || user.displayName || 'Ort Strategy',
           role: 'Ort Strategy Team',
-          email: user.email,
+          email: post?.author?.email || user.email,
         },
         updatedAt: serverTimestamp(),
       }
