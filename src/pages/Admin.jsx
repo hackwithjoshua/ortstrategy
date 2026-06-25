@@ -483,6 +483,7 @@ function PostEditor({ post, onSave, onCancel }) {
     authorName: post?.author?.name || '',
   })
   const [saving, setSaving] = useState(false)
+  const [saveErr, setSaveErr] = useState('')
   const [libraryCallback, setLibraryCallback] = useState(null)
   const isAuthor = !post || !post.author?.email || post.author?.email === user.email
 
@@ -520,13 +521,21 @@ function PostEditor({ post, onSave, onCancel }) {
         await updateDoc(doc(db,'posts',post.id), data)
       }
       onSave()
-    } catch(e) { console.error(e) }
-    finally { setSaving(false) }
+    } catch(e) {
+      console.error(e)
+      setSaveErr(`Save failed: ${e.message}`)
+    } finally { setSaving(false) }
   }
 
   return (
     <>
     <div className={styles.editor}>
+      {saveErr && (
+        <div className={styles.actionErrBanner}>
+          {saveErr}
+          <button onClick={() => setSaveErr('')} className={styles.actionErrClose}>×</button>
+        </div>
+      )}
       <div className={styles.editorHeader}>
         <h2>{post ? 'Edit Post' : 'New Post'}</h2>
         <div className={styles.editorActions}>
@@ -677,13 +686,19 @@ export default function Admin() {
   const [creating, setCreating] = useState(false)
   const [viewMode, setViewMode] = useState('list')
   const [expandedTitle, setExpandedTitle] = useState(null)
+  const [actionErr, setActionErr] = useState('')
 
   const fetchPosts = async () => {
     setLoading(true)
     try {
-      const q = query(collection(db,'posts'), orderBy('publishedAt','desc'))
-      const snap = await getDocs(q)
-      setPosts(snap.docs.map(d=>({id:d.id,...d.data()})))
+      const snap = await getDocs(collection(db,'posts'))
+      const data = snap.docs.map(d=>({id:d.id,...d.data()}))
+      data.sort((a,b) => {
+        const ta = a.publishedAt?.toDate?.() || new Date(0)
+        const tb = b.publishedAt?.toDate?.() || new Date(0)
+        return tb - ta
+      })
+      setPosts(data)
     } catch(e) { console.error(e) }
     finally { setLoading(false) }
   }
@@ -695,17 +710,28 @@ export default function Admin() {
   if (!user) return <LoginPage/>
 
   const handleTogglePublish = async (post) => {
-    await updateDoc(doc(db,'posts',post.id), {
-      published: !post.published,
-      ...((!post.published) ? { publishedAt: serverTimestamp() } : {})
-    })
-    fetchPosts()
+    setActionErr('')
+    try {
+      await updateDoc(doc(db,'posts',post.id), {
+        published: !post.published,
+        ...((!post.published) ? { publishedAt: serverTimestamp() } : {})
+      })
+      fetchPosts()
+    } catch(e) {
+      console.error(e)
+      setActionErr(`Could not ${post.published ? 'unpublish' : 'publish'} post: ${e.message}`)
+    }
   }
 
   const handleDelete = async id => {
     if (!window.confirm('Delete this post?')) return
-    await deleteDoc(doc(db,'posts',id))
-    fetchPosts()
+    try {
+      await deleteDoc(doc(db,'posts',id))
+      fetchPosts()
+    } catch(e) {
+      console.error(e)
+      setActionErr(`Could not delete post: ${e.message}`)
+    }
   }
 
   const formatDate = ts => {
@@ -746,6 +772,12 @@ export default function Admin() {
       </div>
 
       <div className={styles.dashboard}>
+        {actionErr && (
+          <div className={styles.actionErrBanner}>
+            {actionErr}
+            <button onClick={() => setActionErr('')} className={styles.actionErrClose}>×</button>
+          </div>
+        )}
         <div className={styles.dashHeader}>
           <div>
             <h1 className={styles.dashTitle}>Posts</h1>
