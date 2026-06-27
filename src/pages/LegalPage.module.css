@@ -11,10 +11,11 @@
   height: 70px;
   width: auto;
   display: block;
+  filter: brightness(0) invert(1);
 }
 
 [data-theme="light"] .logoImg {
-  filter: invert(1) hue-rotate(180deg);
+  filter: none;
 }
 
 .nav {

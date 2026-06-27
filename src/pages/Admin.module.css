@@ -18,8 +18,8 @@
   display: flex; align-items: center; justify-content: space-between;
 }
 .barLeft { display: flex; align-items: center; gap: 16px; }
-.barLogo { height: 40px; width: auto; }
-[data-theme="light"] .barLogo { filter: invert(1) hue-rotate(180deg); }
+.barLogo { height: 56px; width: auto; filter: brightness(0) invert(1); }
+[data-theme="light"] .barLogo { filter: none; }
 .barTitle {
   font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em;
   text-transform: uppercase; color: var(--text-muted);
@@ -224,8 +224,8 @@
   position: relative; z-index: 1;
   box-shadow: 0 24px 80px rgba(0,0,0,0.3);
 }
-.loginLogo { height: 50px; width: auto; margin-bottom: 12px; }
-[data-theme="light"] .loginLogo { filter: invert(1) hue-rotate(180deg); }
+.loginLogo { height: 60px; width: auto; margin-bottom: 12px; filter: brightness(0) invert(1); }
+[data-theme="light"] .loginLogo { filter: none; }
 .loginTitle { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
 .loginSub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
 .loginForm { width: 100%; display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }

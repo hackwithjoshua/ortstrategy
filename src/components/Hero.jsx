@@ -47,7 +47,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.6 }}
         >
-          Ort Strategy delivers world-class DevOps, Security Consultation,
+          OrtStrategy delivers world-class DevOps, Security Consultation,
           System Design, and Full Stack Development — transforming ambitious
           ideas into scalable, secure digital products.
         </motion.p>

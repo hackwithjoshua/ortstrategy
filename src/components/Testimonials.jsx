@@ -11,7 +11,7 @@ const testimonials = [
     avatar: 'SM',
     color: '#1d6bf3',
     rating: 5,
-    text: "Ort Strategy completely transformed our DevOps culture. We went from monthly releases to deploying 15+ times a day. Their Kubernetes setup and CI/CD pipelines are world-class. I can't recommend them highly enough.",
+    text: "OrtStrategy completely transformed our DevOps culture. We went from monthly releases to deploying 15+ times a day. Their Kubernetes setup and CI/CD pipelines are world-class. I can't recommend them highly enough.",
   },
   {
     id: 2,

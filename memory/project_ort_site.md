@@ -1,6 +1,6 @@
 ---
 name: project-ort-site
-description: Ort Strategy Tech Services website — Vite + React, built at /Users/mac/Desktop/ort-strategy
+description: OrtStrategy Tech Services website — Vite + React, built at /Users/mac/Desktop/ort-strategy
 metadata:
   type: project
 ---

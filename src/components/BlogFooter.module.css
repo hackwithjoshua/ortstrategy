@@ -25,10 +25,11 @@
   height: 36px;
   width: auto;
   display: block;
+  filter: brightness(0) invert(1);
 }
 
 [data-theme="light"] .logo {
-  filter: invert(1) hue-rotate(180deg);
+  filter: none;
 }
 
 .copy {

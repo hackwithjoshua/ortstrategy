@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import { FiSun, FiMoon } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
-import ortLogo from '../assets/ort-logo.svg'
+import ortLogo from '../assets/ort-logo.png'
 import { useTheme } from '../context/ThemeContext'
 import styles from './Navbar.module.css'
 
@@ -63,7 +63,7 @@ export default function Navbar() {
       <div className={styles.container}>
         <img
           src={ortLogo}
-          alt="ORT Strategy"
+          alt="ORTStrategy"
           className={styles.logoImg}
           onClick={() => scrollTo('home')}
           style={{ cursor: 'pointer' }}

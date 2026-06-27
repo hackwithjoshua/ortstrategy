@@ -288,8 +288,8 @@ export default function BlogPost() {
                   {post.author?.name?.[0]?.toUpperCase() || 'O'}
                 </div>
                 <div>
-                  <p className={styles.authorName}>{post.author?.name || 'Ort Strategy'}</p>
-                  <p className={styles.authorRole}>{post.author?.role || 'Ort Strategy Team'}</p>
+                  <p className={styles.authorName}>{post.author?.name || 'OrtStrategy'}</p>
+                  <p className={styles.authorRole}>{post.author?.role || 'OrtStrategy Team'}</p>
                 </div>
               </div>
               <div className={styles.heroMetaRight}>
@@ -380,8 +380,8 @@ export default function BlogPost() {
               </div>
               <div className={styles.bioInfo}>
                 <p className={styles.bioLabel}>Written by</p>
-                <p className={styles.bioName}>{post.author?.name || 'Ort Strategy'}</p>
-                <p className={styles.bioRole}>{post.author?.role || 'Ort Strategy Team'}</p>
+                <p className={styles.bioName}>{post.author?.name || 'OrtStrategy'}</p>
+                <p className={styles.bioRole}>{post.author?.role || 'OrtStrategy Team'}</p>
               </div>
             </div>
           </motion.article>

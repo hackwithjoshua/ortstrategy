@@ -14,7 +14,7 @@ export default function TermsOfService() {
       <h2>1. Acceptance of Terms</h2>
       <p>
         These Terms of Service ("Terms") govern your use of the services provided by Ort Strategy Tech Services
-        ("Ort Strategy", "we", "us", or "our"). By accessing our website, submitting an enquiry, signing a
+        ("OrtStrategy", "we", "us", or "our"). By accessing our website, submitting an enquiry, signing a
         Statement of Work, or using any of our services, you ("Client", "you") agree to these Terms.
       </p>
       <p>
@@ -23,7 +23,7 @@ export default function TermsOfService() {
       </p>
 
       <h2>2. Services Offered</h2>
-      <p>Ort Strategy provides the following categories of services:</p>
+      <p>OrtStrategy provides the following categories of services:</p>
 
       <h3>2.1 Technology Consulting Services</h3>
       <ul>
@@ -93,14 +93,14 @@ export default function TermsOfService() {
       <p>
         Upon receipt of full payment, all custom deliverables created specifically for the Client
         under a Statement of Work (including code, designs, and documentation) become the sole
-        property of the Client. Ort Strategy retains no rights to such work product.
+        property of the Client. OrtStrategy retains no rights to such work product.
       </p>
 
       <h3>6.2 Pre-Existing IP and Tools</h3>
       <p>
-        Ort Strategy retains ownership of all pre-existing intellectual property, internal tools,
+        OrtStrategy retains ownership of all pre-existing intellectual property, internal tools,
         frameworks, methodologies, and know-how. Where pre-existing IP is incorporated into
-        deliverables, Ort Strategy grants the Client a perpetual, non-exclusive licence to use it
+        deliverables, OrtStrategy grants the Client a perpetual, non-exclusive licence to use it
         solely in connection with the delivered work.
       </p>
 
@@ -123,11 +123,11 @@ export default function TermsOfService() {
       </p>
       <p>
         For staffing engagements, all placed engineers are bound by confidentiality agreements with
-        Ort Strategy prior to any client introduction.
+        OrtStrategy prior to any client introduction.
       </p>
 
       <h2>8. Warranties and Representations</h2>
-      <p>Ort Strategy warrants that:</p>
+      <p>OrtStrategy warrants that:</p>
       <ul>
         <li>Services will be performed in a professional and workmanlike manner</li>
         <li>We have the right to provide the services and grant the licences described herein</li>
@@ -141,12 +141,12 @@ export default function TermsOfService() {
 
       <h2>9. Limitation of Liability</h2>
       <p>
-        To the maximum extent permitted by applicable law, Ort Strategy's total liability for any claim
+        To the maximum extent permitted by applicable law, OrtStrategy's total liability for any claim
         arising from these Terms or our services shall not exceed the total fees paid by the Client in the
         3 months immediately preceding the event giving rise to the claim.
       </p>
       <p>
-        In no event shall Ort Strategy be liable for indirect, incidental, special, consequential, or
+        In no event shall OrtStrategy be liable for indirect, incidental, special, consequential, or
         punitive damages, including loss of revenue, loss of profits, loss of data, or business interruption,
         even if advised of the possibility of such damages.
       </p>
@@ -157,7 +157,7 @@ export default function TermsOfService() {
         or longer notice period is specified in the applicable Statement of Work.
       </p>
       <p>
-        Ort Strategy may terminate immediately if the Client breaches these Terms, fails to make payment,
+        OrtStrategy may terminate immediately if the Client breaches these Terms, fails to make payment,
         or engages in conduct that is unlawful or harmful to our engineers or reputation.
       </p>
       <p>
@@ -167,15 +167,15 @@ export default function TermsOfService() {
 
       <h2>11. Independent Contractor</h2>
       <p>
-        Ort Strategy and its engineers operate as independent contractors, not employees, agents, or partners
+        OrtStrategy and its engineers operate as independent contractors, not employees, agents, or partners
         of the Client. Nothing in these Terms creates any employment, joint venture, or partnership relationship.
-        Ort Strategy is solely responsible for all taxes, benefits, and insurance for its personnel.
+        OrtStrategy is solely responsible for all taxes, benefits, and insurance for its personnel.
       </p>
 
       <h2>12. Non-Solicitation</h2>
       <p>
         During any active engagement and for 12 months following its conclusion, the Client agrees not to
-        directly solicit, recruit, or employ any Ort Strategy engineer introduced through our staffing services,
+        directly solicit, recruit, or employ any OrtStrategy engineer introduced through our staffing services,
         without our prior written consent. A placement fee equivalent to 20% of the engineer's annual salary
         applies if this clause is breached.
       </p>

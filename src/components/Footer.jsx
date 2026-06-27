@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FaLinkedin, FaGithub, FaTwitter, FaArrowUp, FaEnvelope } from 'react-icons/fa'
-import ortLogo from '../assets/ort-logo.svg'
+import ortLogo from '../assets/ort-logo.png'
 import styles from './Footer.module.css'
 
 const footerLinks = {

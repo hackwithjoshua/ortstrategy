@@ -43,6 +43,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.ortstrategy.com/blog/the-battle-of-ai-coding-agents-codex-vs-claude-code-explained</loc>
+    <lastmod>2026-06-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.ortstrategy.com/blog/the-serverless-trap</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>monthly</changefreq>
@@ -50,7 +56,7 @@
   </url>
   <url>
     <loc>https://www.ortstrategy.com/blog/ai-is-growing-faster-than-our-data-centres</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-06-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

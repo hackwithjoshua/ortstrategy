@@ -68,7 +68,7 @@ function FeaturedCard({ post }) {
               <div className={styles.avatar} style={{ background: gradient }}>
                 {post.author?.name?.[0]?.toUpperCase() || 'O'}
               </div>
-              <span>{post.author?.name || 'Ort Strategy'}</span>
+              <span>{post.author?.name || 'OrtStrategy'}</span>
               <span className={styles.sep}>·</span>
               <span>{formatDate(post.publishedAt)}</span>
               <span className={styles.sep}>·</span>
@@ -122,7 +122,7 @@ function PostCard({ post, i }) {
               <div className={styles.avatarSm} style={{ background: gradient }}>
                 {post.author?.name?.[0]?.toUpperCase() || 'O'}
               </div>
-              <span className={styles.authorName}>{post.author?.name || 'Ort Strategy'}</span>
+              <span className={styles.authorName}>{post.author?.name || 'OrtStrategy'}</span>
             </div>
             <div className={styles.metaRight}>
               <span>{formatDate(post.publishedAt)}</span>
@@ -213,7 +213,7 @@ export default function Blog() {
               animate={{ opacity:1, y:0 }}
               transition={{ delay:0.1, duration:0.5 }}
             >
-              The Ort Strategy Blog
+              OrtStrategy Blog
             </motion.h1>
             <motion.p
               className={styles.heroSub}

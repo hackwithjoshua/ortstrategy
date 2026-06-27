@@ -32,10 +32,10 @@
 }
 
 .logoWrap { display: flex; align-items: center; }
-.logo { height: 44px; width: auto; display: block; }
+.logo { height: 60px; width: auto; display: block; filter: brightness(0) invert(1); }
 
 [data-theme="light"] .logo {
-  filter: invert(1) hue-rotate(180deg);
+  filter: none;
 }
 
 .divider {
@@ -104,5 +104,5 @@
 }
 
 @media (max-width: 360px) {
-  .logo { height: 36px; }
+  .logo { height: 46px; }
 }

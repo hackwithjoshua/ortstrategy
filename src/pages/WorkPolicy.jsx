@@ -5,9 +5,9 @@ export default function WorkPolicy() {
     <LegalPage title="Work Policy" lastUpdated="June 1, 2026">
       <div className="highlight-box">
         <p>
-          <strong>Summary:</strong> Ort Strategy Tech Services operates as a remote-first, results-driven
+          <strong>Summary:</strong> OrtStrategy Tech Services operates as a remote-first, results-driven
           technology firm. This policy outlines the standards and expectations for every member of
-          the Ort Strategy network: employees, contractors, and placed engineers alike.
+          the OrtStrategy network: employees, contractors, and placed engineers alike.
         </p>
       </div>
 
@@ -21,7 +21,7 @@ export default function WorkPolicy() {
 
       <h2>2. Communication Standards</h2>
       <p>
-        Clear and proactive communication is non-negotiable at Ort Strategy. All team members are expected to:
+        Clear and proactive communication is non-negotiable at OrtStrategy. All team members are expected to:
       </p>
       <ul>
         <li>Be responsive within agreed working hours via the agreed communication channel</li>
@@ -39,13 +39,13 @@ export default function WorkPolicy() {
       </p>
       <p>
         Team members must not discuss, share, or disclose client information with any third party
-        without explicit written consent from both Ort Strategy and the client. Breach of
+        without explicit written consent from both OrtStrategy and the client. Breach of
         confidentiality is grounds for immediate termination of engagement.
       </p>
 
       <h2>4. Professionalism and Integrity</h2>
       <p>
-        Every member of the Ort Strategy network is expected to conduct themselves with integrity,
+        Every member of the OrtStrategy network is expected to conduct themselves with integrity,
         accountability, and respect, in every client interaction, every line of code, and every
         team discussion. This means:
       </p>
@@ -58,8 +58,8 @@ export default function WorkPolicy() {
 
       <h2>5. Quality Standards</h2>
       <p>
-        Ort Strategy is built on a reputation for engineering excellence. All work produced under
-        the Ort Strategy name must meet professional standards:
+        OrtStrategy is built on a reputation for engineering excellence. All work produced under
+        the OrtStrategy name must meet professional standards:
       </p>
       <ul>
         <li>Code must be clean, well-structured, and follow agreed conventions</li>
@@ -84,13 +84,13 @@ export default function WorkPolicy() {
       <p>
         Team members must disclose any actual or potential conflict of interest to Ort Strategy
         management before or as soon as it arises. Working directly with a client outside of an
-        Ort Strategy engagement without prior written approval is a breach of this policy.
+        OrtStrategy engagement without prior written approval is a breach of this policy.
       </p>
 
       <h2>8. Policy Violations</h2>
       <p>
         Violations of this work policy may result in immediate termination of engagement, withholding
-        of outstanding payments, and where applicable, legal action. Ort Strategy reserves the right
+        of outstanding payments, and where applicable, legal action. OrtStrategy reserves the right
         to update this policy at any time with notice to active team members.
       </p>
 

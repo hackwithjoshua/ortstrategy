@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import ortLogo from '../assets/ort-logo.svg'
+import ortLogo from '../assets/ort-logo.png'
 import { useTheme } from '../context/ThemeContext'
 import { FiSun, FiMoon } from 'react-icons/fi'
 import RegBanner from '../components/RegBanner'

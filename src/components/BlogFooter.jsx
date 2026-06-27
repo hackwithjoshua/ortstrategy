@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import ortLogo from '../assets/ort-logo.svg'
+import ortLogo from '../assets/ort-logo.png'
 import styles from './BlogFooter.module.css'
 
 export default function BlogFooter() {

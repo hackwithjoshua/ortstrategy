@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   collection, addDoc, updateDoc, deleteDoc,
-  doc, query, orderBy, where, getDocs, serverTimestamp
+  doc, query, where, getDocs, serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
@@ -12,7 +12,7 @@ import { FaPlus, FaEdit, FaTrash, FaEye, FaSignOutAlt, FaCheck, FaTimes,
   FaList, FaTh } from 'react-icons/fa'
 import { FiSun, FiMoon } from 'react-icons/fi'
 import { useTheme } from '../context/ThemeContext'
-import ortLogo from '../assets/ort-logo.svg'
+import ortLogo from '../assets/ort-logo.png'
 import styles from './Admin.module.css'
 
 // ── Image compressor ──
@@ -507,8 +507,8 @@ function PostEditor({ post, onSave, onCancel }) {
         ...formData,
         tags: form.tags.split(',').map(t=>t.trim()).filter(Boolean),
         author: {
-          name: authorName.trim() || user.displayName || 'Ort Strategy',
-          role: 'Ort Strategy Team',
+          name: authorName.trim() || user.displayName || 'OrtStrategy',
+          role: 'OrtStrategy Team',
           email: post?.author?.email || user.email,
         },
         updatedAt: serverTimestamp(),
@@ -575,7 +575,7 @@ function PostEditor({ post, onSave, onCancel }) {
             <input
               value={form.authorName}
               onChange={e => set('authorName', e.target.value)}
-              placeholder={user.displayName || 'Ort Strategy'}
+              placeholder={user.displayName || 'OrtStrategy'}
               disabled={!isAuthor}
               style={!isAuthor ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
             />
@@ -665,7 +665,7 @@ function MobileBlock() {
       alignItems: 'center', justifyContent: 'center', gap: 20,
       background: 'var(--bg-page)', padding: '32px 24px', textAlign: 'center',
     }}>
-      <img src={ortLogo} alt="Ort Strategy" style={{ height: 52 }} />
+      <img src={ortLogo} alt="Ort Strategy" style={{ height: 64, filter: 'brightness(0) invert(1)' }} />
       <div style={{ fontSize: '3rem' }}>🖥️</div>
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--text-primary)', margin: 0 }}>
         Desktop Only

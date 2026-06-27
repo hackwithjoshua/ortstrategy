@@ -63,7 +63,7 @@ export default function About() {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            Ort Strategy is a premier technology services firm built by engineers,
+            OrtStrategy is a premier technology services firm built by engineers,
             for builders. We combine deep technical expertise with strategic thinking
             to design, build, and scale digital products that matter. From startups
             to enterprises, we've helped dozens of teams move faster, ship smarter,

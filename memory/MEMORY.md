@@ -1,3 +1,3 @@
 # Memory Index
 
-- [Ort Strategy Site Project](project_ort_site.md) — Vite+React marketing site; services, carousel, testimonials, EmailJS contact form
+- [OrtStrategy Site Project](project_ort_site.md) — Vite+React marketing site; services, carousel, testimonials, EmailJS contact form
