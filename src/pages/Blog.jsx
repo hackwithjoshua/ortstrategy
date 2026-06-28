@@ -54,7 +54,8 @@ function FeaturedCard({ post }) {
       transition={{ duration: 0.6 }}
     >
       <Link to={`/blog/${post.slug}`} className={styles.featuredLink}>
-        <div className={styles.featuredCover} style={{ background: post.coverImage ? `url(${post.coverImage}) center/cover` : gradient }}>
+        <div className={styles.featuredCover} style={!post.coverImage ? { background: gradient } : {}}>
+          {post.coverImage && <img src={post.coverImage} alt={post.title} className={styles.coverImg} />}
           <div className={styles.featuredOverlay} />
           <div className={styles.featuredMeta}>
             <span className={styles.catPill} style={{ background:`${color}25`, color, border:`1px solid ${color}50` }}>
@@ -97,7 +98,8 @@ function PostCard({ post, i }) {
       transition={{ delay: (i % 3) * 0.08, duration: 0.5 }}
     >
       <Link to={`/blog/${post.slug}`} className={styles.cardLink}>
-        <div className={styles.cardCover} style={{ background: post.coverImage ? `url(${post.coverImage}) center/cover` : gradient }}>
+        <div className={styles.cardCover} style={!post.coverImage ? { background: gradient } : {}}>
+          {post.coverImage && <img src={post.coverImage} alt={post.title} loading="lazy" className={styles.coverImg} />}
           <span className={styles.catPill} style={{ background:`${color}22`, color, border:`1px solid ${color}44` }}>
             {post.category || 'Engineering'}
           </span>
@@ -158,6 +160,15 @@ export default function Blog() {
   }, [])
 
   useEffect(() => {
+    const CACHE_KEY = 'ort_blog_posts'
+    const cached = sessionStorage.getItem(CACHE_KEY)
+    if (cached) {
+      try {
+        setPosts(JSON.parse(cached))
+        setLoading(false)
+        return
+      } catch { /* fall through to fetch */ }
+    }
     ;(async () => {
       try {
         const q = query(collection(db,'posts'), where('published','==',true))
@@ -168,6 +179,7 @@ export default function Blog() {
           const tb = b.publishedAt?.toDate?.() || new Date(0)
           return tb - ta
         })
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)) } catch { /* storage full */ }
         setPosts(data)
       } catch(e) { console.error(e) }
       finally { setLoading(false) }
