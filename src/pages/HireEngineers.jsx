@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
+import { setSEO } from '../utils/seo'
 import emailjs from '@emailjs/browser'
 import { motion, useInView } from 'framer-motion'
 import { Link } from 'react-router-dom'
@@ -280,6 +281,15 @@ function ProfileCard({ p, i }) {
 export default function HireEngineers() {
   const heroRef = useRef(null)
   const heroInView = useInView(heroRef, { once: true })
+
+  useEffect(() => {
+    setSEO({
+      title: 'Hire Engineers — Pre-Vetted Tech Talent',
+      description: 'Hire pre-vetted software engineers, DevOps specialists, and tech talent through OrtStrategy. Fast matching, flexible engagement, proven results.',
+      keywords: 'hire engineers, hire software developers, DevOps engineers for hire, tech talent, pre-vetted engineers, software outsourcing, OrtStrategy',
+      path: '/hire-engineers',
+    })
+  }, [])
 
   const scrollToForm = () => {
     document.getElementById('hire-form')?.scrollIntoView({ behavior: 'smooth' })

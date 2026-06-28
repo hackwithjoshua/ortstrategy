@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useInView } from 'framer-motion'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
+import { setSEO } from '../utils/seo'
 import BlogNavbar from '../components/BlogNavbar'
 import BlogFooter from '../components/BlogFooter'
 import styles from './Blog.module.css'
@@ -146,6 +147,15 @@ export default function Blog() {
   const navigate = useNavigate()
   const location = useLocation()
   const activeTag = new URLSearchParams(location.search).get('tag') || ''
+
+  useEffect(() => {
+    setSEO({
+      title: 'Blog — Engineering Insights & Deep Dives',
+      description: 'Engineering insights, deep dives, and stories from the OrtStrategy team. DevOps, security, system design, and more.',
+      keywords: 'engineering blog, DevOps articles, system design, security, full stack, tech insights',
+      path: '/blog',
+    })
+  }, [])
 
   useEffect(() => {
     ;(async () => {

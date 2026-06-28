@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { setSEO } from '../utils/seo'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import ortLogo from '../assets/ort-logo.png'
@@ -31,7 +32,13 @@ function ThemeToggle() {
 export default function LegalPage({ title, lastUpdated, children }) {
   useEffect(() => {
     window.scrollTo(0, 0)
-  }, [])
+    const slug = title.toLowerCase().replace(/\s+/g, '-')
+    setSEO({
+      title,
+      description: `OrtStrategy ${title} — read our policies and legal information.`,
+      path: `/${slug}`,
+    })
+  }, [title])
 
   return (
     <div className={styles.page}>

@@ -5,7 +5,7 @@ export default function PrivacyPolicy() {
     <LegalPage title="Privacy Policy" lastUpdated="June 1, 2026">
       <div className="highlight-box">
         <p>
-          <strong>Summary:</strong> Ort Strategy Tech Services respects your privacy. We collect only what we need
+          <strong>Summary:</strong> OrtStrategy Tech Services respects your privacy. We collect only what we need
           to provide our services, never sell your data, and give you control over your information.
           This policy covers our technology consulting services, full-stack development engagements,
           and our engineer staffing platform.
@@ -14,7 +14,7 @@ export default function PrivacyPolicy() {
 
       <h2>1. Who We Are</h2>
       <p>
-        Ort Strategy Tech Services ("Ort Strategy", "we", "us", or "our") is a technology services company
+        OrtStrategy Tech Services ("OrtStrategy", "we", "us", or "our") is a technology services company
         providing DevOps Engineering, System Design, Security Consultation, Full Stack Development,
         Data Engineering, and Engineer Staffing/Outsourcing services to businesses worldwide.
       </p>
@@ -125,7 +125,7 @@ export default function PrivacyPolicy() {
 
       <h2>8. International Data Transfers</h2>
       <p>
-        Ort Strategy operates globally. Your information may be transferred to and processed in countries
+        OrtStrategy operates globally. Your information may be transferred to and processed in countries
         other than your own. We ensure appropriate safeguards are in place for any international transfer,
         including standard contractual clauses where applicable.
       </p>

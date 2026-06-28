@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { collection, query, where, getDocs, limit } from 'firebase/firestore'
 import { db } from '../firebase'
+import { setSEO } from '../utils/seo'
 import { FaArrowLeft, FaTwitter, FaLinkedin, FaLink } from 'react-icons/fa'
 import BlogNavbar from '../components/BlogNavbar'
 import BlogFooter from '../components/BlogFooter'
@@ -192,6 +193,30 @@ export default function BlogPost() {
         const data = { id: snap.docs[0].id, ...snap.docs[0].data() }
         setPost(data)
         setToc(extractTOC(data.content))
+        const pubDate = data.publishedAt?.toDate?.()?.toISOString() || new Date().toISOString()
+        setSEO({
+          title: data.title,
+          description: data.excerpt || data.title,
+          path: `/blog/${data.slug}`,
+          image: data.coverImage || undefined,
+          type: 'article',
+          jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: data.title,
+            description: data.excerpt || '',
+            image: data.coverImage || 'https://www.ortstrategy.com/ort-logo.png',
+            datePublished: pubDate,
+            dateModified: data.updatedAt?.toDate?.()?.toISOString() || pubDate,
+            author: { '@type': 'Person', name: data.author?.name || 'OrtStrategy' },
+            publisher: {
+              '@type': 'Organization',
+              name: 'OrtStrategy',
+              logo: { '@type': 'ImageObject', url: 'https://www.ortstrategy.com/ort-logo.png' },
+            },
+            url: `https://www.ortstrategy.com/blog/${data.slug}`,
+          },
+        })
         const rq = query(collection(db,'posts'), where('published','==',true), where('category','==',data.category), limit(4))
         const rsnap = await getDocs(rq)
         setRelated(rsnap.docs.map(d => ({ id:d.id, ...d.data() })).filter(p => p.slug !== slug).slice(0, 3))
