@@ -1,5 +1,5 @@
 const SITE = 'https://www.ortstrategy.com'
-const DEFAULT_IMG = `${SITE}/ort-logo.png`
+const DEFAULT_IMG = `${SITE}/og-image.png`
 const DEFAULT_DESC = 'OrtStrategy delivers expert DevOps, system design, security consulting, and full stack engineering solutions. Scale your technology with confidence.'
 
 function setTag(selector, attr, content) {

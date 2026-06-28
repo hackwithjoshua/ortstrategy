@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { resolve, dirname } from 'path'
 
 const SITE = 'https://www.ortstrategy.com'
-const DEFAULT_IMG = `${SITE}/ort-logo.png`
+const DEFAULT_IMG = `${SITE}/og-image.png`
 
 // ── Load .env / .env.local ──────────────────────────────────────────────────
 function loadEnv() {
