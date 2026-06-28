@@ -238,4 +238,5 @@
   .footerInner { flex-direction: column; align-items: flex-start; }
   .navRight { gap: 10px; }
   .backBtn { font-size: 0.78rem; }
+  .logoImg { height: 48px; }
 }

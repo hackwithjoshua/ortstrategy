@@ -783,10 +783,16 @@
   .profilesGrid { grid-template-columns: 1fr; }
   .formRow { grid-template-columns: 1fr; }
   .formWrap { padding: 28px 20px; }
+  .section { padding: 70px 20px; }
+  .profileCard { gap: 14px; padding: 20px; }
 }
 
 @media (max-width: 480px) {
-  .hero { padding: 120px 20px 60px; }
+  .hero { padding: 120px 20px 60px; gap: 40px; }
   .statsRow { grid-template-columns: 1fr 1fr; }
   .stackGrid { grid-template-columns: repeat(3, 1fr); }
+  .engCard { padding: 28px 20px; }
+  .stepCard { padding: 28px 20px; }
+  .statCard { padding: 20px 16px; }
+  .statValue { font-size: 1.8rem; }
 }

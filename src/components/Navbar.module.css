@@ -217,10 +217,11 @@
   .links, .actions { display: none; }
   .hamburger { display: block; }
   .container { padding: 0 20px; }
+  .logoImg { height: 48px; }
 }
 
 @media (max-width: 400px) {
   .container { padding: 0 14px; gap: 10px; }
-  .logoImg { height: 50px; }
+  .logoImg { height: 40px; }
   .mobile { padding: 10px 16px 16px; }
 }

@@ -212,4 +212,6 @@
 @media (max-width: 900px) {
   .links, .actions { display: none; }
   .hamburger { display: block; }
+  .container { padding: 0 20px; }
+  .logoImg { height: 48px; }
 }
