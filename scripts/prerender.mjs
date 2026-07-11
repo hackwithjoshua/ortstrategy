@@ -124,19 +124,6 @@ const STATIC_ROUTES = [
 ]
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-// ── Inject a <noscript> post list into the blog index page ──────────────────
-// <noscript> is indexed by Googlebot and is a legitimate way to expose
-// links to crawlers that don't execute JavaScript. React renders the real
-// list for users; this is only seen when JS is disabled or by crawlers.
-function injectBlogLinks(html, posts) {
-  if (!posts.length) return html
-  const items = posts
-    .map(p => `<li><a href="${SITE}/blog/${p.slug}">${p.title}</a></li>`)
-    .join('\n      ')
-  const block = `\n  <noscript>\n    <ul>\n      ${items}\n    </ul>\n  </noscript>`
-  return html.replace('</body>', `${block}\n</body>`)
-}
-
 async function run() {
   console.log('Pre-rendering routes...')
   const base = readFileSync(resolve(process.cwd(), 'dist/index.html'), 'utf8')
@@ -182,12 +169,17 @@ async function run() {
     console.log(`  ✓ /blog/${post.slug}`)
   }
 
-  // Inject static <a> links into the blog index so Googlebot follows them
+  // Inject static content + links into the blog index so Googlebot has real
+  // visible text to use as the search snippet and links to follow to posts.
   if (posts.length) {
     const blogIndexPath = resolve(process.cwd(), 'dist/blog/index.html')
-    const blogHtml = readFileSync(blogIndexPath, 'utf8')
-    write(blogIndexPath, injectBlogLinks(blogHtml, posts))
-    console.log(`  ✓ injected ${posts.length} crawler links into /blog`)
+    let blogHtml = readFileSync(blogIndexPath, 'utf8')
+
+    // Visible intro paragraph Google can use as the search description
+    const intro = `\n  <noscript>\n    <main>\n      <h1>OrtStrategy Blog — Engineering Insights &amp; Deep Dives</h1>\n      <p>Engineering insights, deep dives, and stories from the OrtStrategy team covering DevOps, cloud architecture, security consulting, system design, full stack development, and AI/ML. Written by practising engineers.</p>\n      <ul>\n${posts.map(p => `        <li><a href="${SITE}/blog/${p.slug}">${p.title}</a>${p.excerpt ? ` — ${p.excerpt}` : ''}</li>`).join('\n')}\n      </ul>\n    </main>\n  </noscript>`
+    blogHtml = blogHtml.replace('</body>', `${intro}\n</body>`)
+    write(blogIndexPath, blogHtml)
+    console.log(`  ✓ injected ${posts.length} crawler links + description into /blog`)
   }
 
   console.log(`  Done — ${STATIC_ROUTES.length} static + ${posts.length} blog routes pre-rendered`)
