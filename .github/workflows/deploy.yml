@@ -39,5 +39,3 @@ jobs:
       - name: Deploy to Firebase
         run: npx firebase-tools deploy --only hosting,firestore:rules,firestore:indexes --token "$FIREBASE_TOKEN"
 
-      - name: Ping Google sitemap
-        run: curl -s "https://www.google.com/ping?sitemap=https://www.ortstrategy.com/sitemap.xml" || true

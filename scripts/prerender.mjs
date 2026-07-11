@@ -124,16 +124,16 @@ const STATIC_ROUTES = [
 ]
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-// ── Inject a static post link list into the blog index page ─────────────────
-// Googlebot reads <a> links from static HTML and follows them directly,
-// bypassing the sitemap crawl schedule. This is the fastest way to get
-// blog posts discovered and indexed without any manual GSC actions.
+// ── Inject a <noscript> post list into the blog index page ──────────────────
+// <noscript> is indexed by Googlebot and is a legitimate way to expose
+// links to crawlers that don't execute JavaScript. React renders the real
+// list for users; this is only seen when JS is disabled or by crawlers.
 function injectBlogLinks(html, posts) {
   if (!posts.length) return html
-  const links = posts
-    .map(p => `<a href="${SITE}/blog/${p.slug}">${p.title}</a>`)
-    .join('\n    ')
-  const block = `\n  <nav id="__crawler_links" aria-label="Blog posts" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">\n    ${links}\n  </nav>`
+  const items = posts
+    .map(p => `<li><a href="${SITE}/blog/${p.slug}">${p.title}</a></li>`)
+    .join('\n      ')
+  const block = `\n  <noscript>\n    <ul>\n      ${items}\n    </ul>\n  </noscript>`
   return html.replace('</body>', `${block}\n</body>`)
 }
 
