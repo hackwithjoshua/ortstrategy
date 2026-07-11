@@ -35,6 +35,75 @@ function compressImage(file, maxWidth=1200, quality=0.8) {
   })
 }
 
+// ── Image token helpers ──────────────────────────────────────────────────────
+
+// Replace base64 data URLs in markdown with short @img:ID tokens
+function tokenizeImages(md) {
+  const map = {}
+  const tokenized = (md || '').replace(
+    /!\[([^\]]*)\]\((data:[^)]*)\)/g,
+    (_, alt, src) => {
+      const id = Math.random().toString(36).slice(2, 10)
+      map[id] = { src, alt }
+      return `![${alt}](@img:${id})`
+    }
+  )
+  return { tokenized, map }
+}
+
+// Expand @img:ID tokens back to full base64 markdown
+function expandTokens(text, map) {
+  return text.replace(
+    /!\[([^\]]*)\]\(@img:([a-z0-9]+)\)/g,
+    (_, alt, id) => (map[id] ? `![${alt}](${map[id].src})` : '')
+  )
+}
+
+// Render tokenized markdown to HTML for the contentEditable display area
+// Images become real <img> elements; everything else is plain text with <br> for newlines
+function tokenizedToEditHtml(text, map) {
+  const parts = (text || '').split(/(!\[[^\]]*\]\(@img:[a-z0-9]+\))/g)
+  return parts.map(part => {
+    const m = part.match(/!\[([^\]]*)\]\(@img:([a-z0-9]+)\)/)
+    if (m) {
+      const [, alt, id] = m
+      const img = map[id]
+      if (!img) return ''
+      const esc = s => s.replace(/"/g, '&quot;')
+      return `<img src="${img.src}" alt="${esc(alt)}" data-id="${id}" contenteditable="false" class="${styles.editorImg}" />`
+    }
+    return part
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>')
+  }).join('')
+}
+
+// Read the contentEditable innerHTML back into tokenized markdown
+function editHtmlToTokenized(html) {
+  const div = document.createElement('div')
+  div.innerHTML = html
+  let out = ''
+  const walk = (node) => {
+    if (node.nodeType === 3) {
+      out += node.textContent
+    } else if (node.nodeName === 'IMG') {
+      const id = node.getAttribute('data-id')
+      const alt = node.getAttribute('alt') || ''
+      if (id) out += `\n![${alt}](@img:${id})\n`
+    } else if (node.nodeName === 'BR') {
+      out += '\n'
+    } else {
+      const isBlock = /^(DIV|P|H[1-6]|LI|BLOCKQUOTE)$/.test(node.nodeName)
+      if (isBlock && out.length > 0 && !out.endsWith('\n')) out += '\n'
+      for (const c of node.childNodes) walk(c)
+    }
+  }
+  for (const c of div.childNodes) walk(c)
+  return out.replace(/\n{3,}/g, '\n\n')
+}
+
 // ── Markdown toolbar ──
 const TOOLBAR = [
   { icon: FaHeading, label: 'H2', wrap: '## ', block: true },
@@ -48,99 +117,116 @@ const TOOLBAR = [
 ]
 
 function MarkdownEditor({ value, onChange, onOpenLibrary }) {
-  const ref = useRef(null)
+  const editorRef = useRef(null)
+  const imgMap = useRef({})
   const imgInputRef = useRef(null)
+  const grammarTimer = useRef(null)
   const [preview, setPreview] = useState(false)
   const [hasSelection, setHasSelection] = useState(false)
   const [grammar, setGrammar] = useState([])
   const [grammarOpen, setGrammarOpen] = useState(false)
   const [checking, setChecking] = useState(false)
   const [insertingImg, setInsertingImg] = useState(false)
-  const grammarTimer = useRef(null)
 
-  // ── Track selection ──
-  const handleSelect = () => {
-    const ta = ref.current
-    if (!ta) return
-    setHasSelection(ta.selectionStart !== ta.selectionEnd)
-  }
-
-  // ── Toggle inline wrap (bold/italic/code) ──
-  const toggleWrap = (wrap) => {
-    const ta = ref.current
-    if (!ta) return
-    const start = ta.selectionStart
-    const end = ta.selectionEnd
-    const selected = value.slice(start, end)
-    if (!selected) return
-
-    // Check if selected text itself is wrapped: **text**
-    const innerWrapped = selected.startsWith(wrap) && selected.endsWith(wrap) && selected.length > wrap.length * 2
-    // Check if surrounding context is wrapped: |**text**|
-    const outerWrapped = value.slice(start - wrap.length, start) === wrap && value.slice(end, end + wrap.length) === wrap
-
-    let newText, newStart, newEnd
-    if (innerWrapped) {
-      const unwrapped = selected.slice(wrap.length, selected.length - wrap.length)
-      newText = value.slice(0, start) + unwrapped + value.slice(end)
-      newStart = start; newEnd = start + unwrapped.length
-    } else if (outerWrapped) {
-      newText = value.slice(0, start - wrap.length) + selected + value.slice(end + wrap.length)
-      newStart = start - wrap.length; newEnd = newStart + selected.length
-    } else {
-      newText = value.slice(0, start) + wrap + selected + wrap + value.slice(end)
-      newStart = start + wrap.length; newEnd = newStart + selected.length
+  // Initialize editor on mount — key prop on <MarkdownEditor> forces remount on post switch
+  useEffect(() => {
+    const { tokenized, map } = tokenizeImages(value || '')
+    imgMap.current = map
+    if (editorRef.current) {
+      editorRef.current.innerHTML = tokenizedToEditHtml(tokenized, map)
     }
-    onChange(newText)
-    setTimeout(() => { ta.focus(); ta.selectionStart = newStart; ta.selectionEnd = newEnd }, 10)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Track text selection inside the editor
+  useEffect(() => {
+    const handler = () => {
+      const sel = window.getSelection()
+      setHasSelection(!!(sel && !sel.isCollapsed && editorRef.current?.contains(sel.anchorNode)))
+    }
+    document.addEventListener('selectionchange', handler)
+    return () => document.removeEventListener('selectionchange', handler)
+  }, [])
+
+  // Read the current tokenized content from the editor DOM
+  const getTokenized = () => editorRef.current ? editHtmlToTokenized(editorRef.current.innerHTML) : ''
+
+  // Sync to parent whenever editor content changes
+  const handleInput = () => {
+    const tokenized = getTokenized()
+    const expanded = expandTokens(tokenized, imgMap.current)
+    onChange(expanded)
+    clearTimeout(grammarTimer.current)
+    grammarTimer.current = setTimeout(() => checkGrammar(expanded), 2000)
   }
 
-  // ── Toggle block prefix (H2, H3, quote, list) ──
+  // ── Toolbar: inline wrap (bold / italic / code) ──
+  const toggleWrap = (wrap) => {
+    const sel = window.getSelection()
+    if (!sel?.rangeCount) return
+    const selected = sel.toString()
+    if (!selected) return
+    const isWrapped = selected.startsWith(wrap) && selected.endsWith(wrap) && selected.length > wrap.length * 2
+    document.execCommand('insertText', false, isWrapped ? selected.slice(wrap.length, -wrap.length) : `${wrap}${selected}${wrap}`)
+  }
+
+  // ── Toolbar: block prefix (heading / list / quote) ──
   const togglePrefix = (prefix) => {
-    const ta = ref.current
-    if (!ta) return
-    const start = ta.selectionStart
-    const end = ta.selectionEnd
-    if (start === end) return
-    const lineStart = value.lastIndexOf('\n', start - 1) + 1
-    const lineEnd = value.indexOf('\n', end - 1)
-    const block = value.slice(lineStart, lineEnd === -1 ? undefined : lineEnd)
-    const isOn = block.split('\n').every(l => l.startsWith(prefix))
-    const toggled = block.split('\n').map(l => isOn ? l.slice(prefix.length) : prefix + l).join('\n')
-    const newText = value.slice(0, lineStart) + toggled + (lineEnd === -1 ? '' : value.slice(lineEnd))
-    onChange(newText)
-    setTimeout(() => { ta.focus() }, 10)
+    const sel = window.getSelection()
+    if (!sel?.rangeCount) return
+    const selected = sel.toString()
+    if (!selected) return
+    const lines = selected.split('\n')
+    const allPrefixed = lines.every(l => l.startsWith(prefix))
+    document.execCommand('insertText', false, allPrefixed ? lines.map(l => l.slice(prefix.length)).join('\n') : lines.map(l => prefix + l).join('\n'))
   }
 
   const handleToolbar = (btn) => {
+    editorRef.current?.focus()
     if (btn.block) togglePrefix(btn.wrap)
     else toggleWrap(btn.wrap)
   }
 
-  // ── Insert code block at cursor ──
+  // ── Insert code block ──
   const insertCodeBlock = () => {
-    const ta = ref.current
-    if (!ta) return
-    const pos = ta.selectionStart
-    const snippet = '\n\`\`\`\npaste your code here\n\`\`\`\n'
-    const newText = value.slice(0, pos) + snippet + value.slice(pos)
-    onChange(newText)
-    setTimeout(() => { ta.focus(); ta.selectionStart = ta.selectionEnd = pos + 5 }, 10)
+    editorRef.current?.focus()
+    document.execCommand('insertText', false, '\n```\npaste your code here\n```\n')
   }
 
-  // ── Insert inline image at cursor — compress hard to keep doc small ──
+  // ── Insert image element at cursor position ──
+  const insertImgAtCursor = (src, alt, id) => {
+    imgMap.current[id] = { src, alt }
+    editorRef.current?.focus()
+    const sel = window.getSelection()
+    const el = document.createElement('img')
+    el.src = src
+    el.alt = alt
+    el.setAttribute('data-id', id)
+    el.contentEditable = 'false'
+    el.className = styles.editorImg
+    if (sel?.rangeCount) {
+      const range = sel.getRangeAt(0)
+      range.deleteContents()
+      range.insertNode(el)
+      range.setStartAfter(el)
+      range.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(range)
+    } else {
+      editorRef.current?.appendChild(el)
+    }
+    handleInput()
+  }
+
+  // ── Inline image from file upload ──
   const handleInlineImage = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
     setInsertingImg(true)
     try {
-      const dataUrl = await compressImage(file, 1200, 0.88)
-      const ta = ref.current
-      const pos = ta ? ta.selectionStart : value.length
-      const label = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
-      const snippet = `\n![${label}](${dataUrl})\n`
-      onChange(value.slice(0, pos) + snippet + value.slice(pos))
-      setPreview(true) // auto-switch to preview so user sees the image immediately
+      const src = await compressImage(file, 1200, 0.88)
+      const alt = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
+      const id = Math.random().toString(36).slice(2, 10)
+      insertImgAtCursor(src, alt, id)
     } finally {
       setInsertingImg(false)
       e.target.value = ''
@@ -156,39 +242,38 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
     if (e.key === 'k') { e.preventDefault(); toggleWrap('`') }
   }
 
-  // ── Grammar check via LanguageTool free API ──
-  const stripMd = (md) => md
+  // ── Grammar check ──
+  const stripMd = (md) => (md || '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/^#{1,6}\s/gm,'').replace(/\*\*(.+?)\*\*/g,'$1')
     .replace(/\*(.+?)\*/g,'$1').replace(/`(.+?)`/g,'$1')
     .replace(/^[-*]\s/gm,'').replace(/^>\s/gm,'')
 
   const checkGrammar = async (text) => {
-    if (!text?.trim() || text.trim().length < 20) { setGrammar([]); return }
+    const plain = stripMd(text)
+    if (!plain?.trim() || plain.trim().length < 20) { setGrammar([]); return }
     setChecking(true)
     try {
-      const body = new URLSearchParams({ text: stripMd(text), language: 'en-US', enabledOnly: 'false' })
+      const body = new URLSearchParams({ text: plain, language: 'en-US', enabledOnly: 'false' })
       const res = await fetch('https://api.languagetool.org/v2/check', { method:'POST', body })
       const data = await res.json()
       setGrammar(data.matches?.filter(m => m.replacements?.length > 0) || [])
-    } catch(e) { /* silent */ }
+    } catch { /* silent */ }
     finally { setChecking(false) }
   }
 
-  const handleChange = (e) => {
-    const v = e.target.value
-    onChange(v)
-    clearTimeout(grammarTimer.current)
-    grammarTimer.current = setTimeout(() => checkGrammar(v), 2000)
-  }
-
-  // Apply a grammar fix
   const applyFix = (match) => {
     const fix = match.replacements[0]?.value
     if (!fix) return
-    // Re-strip text to find real offset in original
-    const plain = stripMd(value)
+    const expanded = expandTokens(getTokenized(), imgMap.current)
+    const plain = stripMd(expanded)
     const errorStr = plain.slice(match.offset, match.offset + match.length)
-    onChange(value.replace(errorStr, fix))
+    if (!errorStr) return
+    const newExpanded = expanded.replace(errorStr, fix)
+    const { tokenized, map } = tokenizeImages(newExpanded)
+    Object.assign(imgMap.current, map)
+    if (editorRef.current) editorRef.current.innerHTML = tokenizedToEditHtml(tokenized, imgMap.current)
+    onChange(newExpanded)
     setGrammar(prev => prev.filter(m => m !== match))
   }
 
@@ -233,22 +318,18 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
         <div className={styles.toolbarSep} />
         <span className={styles.toolbarHint}>{hasSelection ? 'Click to toggle' : 'Select text'}</span>
         <div className={styles.toolbarSep} />
-        {/* Code block — always available */}
         <button type="button" className={styles.toolbarBtn} onClick={insertCodeBlock} title="Insert code block">
           <FaCode style={{ fontSize:'0.8rem' }}/><span>Code Block</span>
         </button>
-        {/* Inline image insert */}
         <input ref={imgInputRef} type="file" accept="image/*" onChange={handleInlineImage} style={{ display:'none' }}/>
         <button
           type="button"
           className={styles.toolbarBtn}
           onClick={() => {
             if (onOpenLibrary) {
-              onOpenLibrary((dataUrl) => {
-                const ta = ref.current
-                const pos = ta ? ta.selectionStart : value.length
-                onChange(value.slice(0, pos) + `\n![image](${dataUrl})\n` + value.slice(pos))
-                setPreview(true)
+              onOpenLibrary((src) => {
+                const id = Math.random().toString(36).slice(2, 10)
+                insertImgAtCursor(src, 'image', id)
               })
             } else {
               imgInputRef.current?.click()
@@ -265,7 +346,7 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
               type="button"
               className={`${styles.toolbarBtn} ${grammarOpen ? styles.toolbarActive : ''}`}
               onClick={() => setGrammarOpen(o => !o)}
-              style={{ color: grammarOpen ? '#f59e0b' : '#f59e0b', gap:'5px' }}
+              style={{ color:'#f59e0b', gap:'5px' }}
             >
               ⚠️ <span>{grammarCount} issue{grammarCount > 1 ? 's' : ''}</span>
             </button>
@@ -306,23 +387,20 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
         </div>
       )}
 
-      {/* Editor / Preview */}
-      {preview ? (
+      {/* Editor area — always in DOM so content survives preview toggle */}
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        className={styles.contentArea}
+        style={{ display: preview ? 'none' : undefined }}
+        data-placeholder="Start writing...&#10;&#10;## H2 heading  |  ### H3 heading&#10;&#10;Select text then click Bold/Italic, or use Cmd+B / Cmd+I / Cmd+K"
+        spellCheck
+      />
+      {preview && (
         <div className={styles.mdPreview} dangerouslySetInnerHTML={{ __html: renderMd(value) }} />
-      ) : (
-        <textarea
-          ref={ref}
-          value={value}
-          onChange={handleChange}
-          onSelect={handleSelect}
-          onKeyDown={handleKeyDown}
-          onKeyUp={handleSelect}
-          onMouseUp={handleSelect}
-          placeholder={'Start writing...\n\n## H2 heading  |  ### H3 heading\n\nHighlight text, then click Bold/Italic or use:\nCmd+B = bold   Cmd+I = italic   Cmd+K = code\n\n(Grammar suggestions appear automatically after you stop typing)'}
-          rows={22}
-          className={styles.contentArea}
-          spellCheck={true}
-        />
       )}
     </div>
   )
@@ -565,7 +643,7 @@ function PostEditor({ post, onSave, onCancel }) {
           </div>
           <div className={styles.field}>
             <label>Content *</label>
-            <MarkdownEditor value={form.content} onChange={v => set('content', v)} onOpenLibrary={openLibrary} />
+            <MarkdownEditor key={post?.id || 'new'} value={form.content} onChange={v => set('content', v)} onOpenLibrary={openLibrary} />
           </div>
         </div>
 

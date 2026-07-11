@@ -392,7 +392,26 @@
 }
 .hint { font-size: 0.68rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-muted); }
 .lockedHint { font-size: 0.66rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: #f59e0b; }
-.contentArea { resize: vertical; min-height: 400px; font-family: ui-monospace, monospace; font-size: 0.88rem; line-height: 1.7; border-radius: 0 0 10px 10px !important; }
+.contentArea {
+  min-height: 440px; padding: 16px 20px;
+  font-family: ui-monospace, monospace; font-size: 0.88rem; line-height: 1.7;
+  border-radius: 0 0 10px 10px !important;
+  outline: none; white-space: pre-wrap; word-break: break-word;
+  background: var(--bg-page); color: var(--text-primary);
+  overflow-y: auto;
+}
+.contentArea:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+  white-space: pre-line;
+}
+.editorImg {
+  max-width: 100%; display: block; margin: 12px 0;
+  border-radius: 8px; cursor: default;
+  outline: 2px solid transparent; transition: outline-color 0.15s;
+}
+.editorImg:hover { outline-color: var(--blue-bright); }
 
 /* Markdown editor */
 .mdEditor { display: flex; flex-direction: column; border: 1px solid var(--border-input); border-radius: 10px; overflow: hidden; }
@@ -474,7 +493,8 @@
 .toolbarSep { width: 1px; height: 20px; background: var(--border-card); margin: 0 4px; }
 
 .mdEditor .field input,
-.mdEditor textarea { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
+.mdEditor textarea,
+.mdEditor .contentArea { border: none !important; box-shadow: none !important; }
 
 .mdPreview {
   min-height: 400px; padding: 20px 24px;
