@@ -159,49 +159,15 @@
 .monthLabel { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
 
 /* GSC placeholder card */
-.gscSection {
+.gscCard {
   background: var(--bg-card); border: 1px solid var(--border-card);
-  border-radius: 14px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px;
+  border-radius: 14px; padding: 22px 24px; display: flex; flex-direction: column; gap: 10px;
 }
-.gscHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.gscPeriod { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
-.gscLoadBtn {
-  flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;
-  background: var(--gradient-primary); color: #fff; border: none; cursor: pointer;
-  transition: opacity 0.2s; white-space: nowrap;
+.gscCardNote {
+  font-size: 0.84rem; color: var(--text-muted); line-height: 1.65;
 }
-.gscLoadBtn:hover:not(:disabled) { opacity: 0.88; }
-.gscLoadBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-.gscHint { font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; }
-.gscErr { font-size: 0.84rem; color: #ef4444; }
-
-/* GSC table */
-.gscTable { display: flex; flex-direction: column; gap: 0; overflow-x: auto; }
-.gscHead {
-  display: grid; grid-template-columns: 1fr 80px 110px 70px 110px;
-  padding: 0 12px 10px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 1px solid var(--border-card);
-}
-.gscRow {
-  display: grid; grid-template-columns: 1fr 80px 110px 70px 110px;
-  align-items: center; padding: 11px 12px;
-  border-bottom: 1px solid var(--border-card); transition: background 0.15s;
-}
-.gscRow:last-child { border-bottom: none; }
-.gscRow:hover { background: var(--bg-input); }
-.gscPostCell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.gscPostLink {
-  font-size: 0.88rem; font-weight: 600; color: var(--text-primary);
-  text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.gscPostLink:hover { color: var(--blue-bright); }
-.gscAuthor { font-size: 0.72rem; color: var(--text-muted); }
-.gscStat { font-size: 0.88rem; font-weight: 600; color: var(--text-secondary); text-align: center; }
-.gscClicks { color: var(--blue-bright) !important; font-size: 0.95rem !important; }
-.gscPosGood { color: #10b981 !important; }
-.gscPosMid  { color: #f59e0b !important; }
-.gscPosBad  { color: var(--text-muted) !important; }
+.gscCardNote a { color: var(--blue-bright); text-decoration: none; }
+.gscCardNote a:hover { text-decoration: underline; }
 
 /* Search */
 .searchWrap { position: relative; display: flex; align-items: center; }

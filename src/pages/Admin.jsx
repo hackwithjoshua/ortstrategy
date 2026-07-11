@@ -5,7 +5,6 @@ import {
   doc, query, where, getDocs, serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../firebase'
-import { getFunctions, httpsCallable } from 'firebase/functions'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { FaPlus, FaEdit, FaTrash, FaEye, FaSignOutAlt, FaCheck, FaTimes,
@@ -772,9 +771,6 @@ export default function Admin() {
   const [page, setPage] = useState(0)
   const [tab, setTab] = useState('posts')
   const [authorFilter, setAuthorFilter] = useState(null)
-  const [gscData, setGscData] = useState(null)
-  const [gscLoading, setGscLoading] = useState(false)
-  const [gscErr, setGscErr] = useState('')
 
   // Client-side search + optional author filter — no extra DB reads, always instant
   const filteredPosts = useMemo(() => {
@@ -843,20 +839,6 @@ export default function Admin() {
       setPosts(data)
     } catch(e) { console.error(e) }
     finally { setLoading(false) }
-  }
-
-  const loadGscData = async () => {
-    setGscLoading(true)
-    setGscErr('')
-    try {
-      const fn = httpsCallable(getFunctions(), 'getSearchInsights')
-      const { data } = await fn()
-      setGscData(data)
-    } catch(e) {
-      setGscErr(e.message || 'Could not load search data')
-    } finally {
-      setGscLoading(false)
-    }
   }
 
   useEffect(() => { if (user) fetchPosts() }, [user])
@@ -1068,72 +1050,16 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* Google Search Console live data */}
-            <div className={styles.gscSection}>
-              <div className={styles.gscHeader}>
-                <div>
-                  <p className={styles.insightBoxTitle}>Google Search Performance — last 90 days</p>
-                  {gscData?.period && <p className={styles.gscPeriod}>{gscData.period}</p>}
-                </div>
-                <button className={styles.gscLoadBtn} onClick={loadGscData} disabled={gscLoading}>
-                  {gscLoading
-                    ? <><span className={styles.btnSpinner}/> Loading...</>
-                    : gscData ? '↻ Refresh' : '🔍 Load Search Data'}
-                </button>
-              </div>
-
-              {gscErr && <p className={styles.gscErr}>⚠ {gscErr}</p>}
-
-              {!gscData && !gscLoading && !gscErr && (
-                <p className={styles.gscHint}>
-                  Click "Load Search Data" to pull real clicks, impressions, CTR and ranking position from Google Search Console for every post.
-                </p>
-              )}
-
-              {gscData && (() => {
-                const SITE = 'https://www.ortstrategy.com'
-                const rows = posts
-                  .map(p => {
-                    const stats =
-                      gscData.rows[`${SITE}/blog/${p.slug}/`] ||
-                      gscData.rows[`${SITE}/blog/${p.slug}`] || null
-                    return stats ? { ...p, ...stats } : null
-                  })
-                  .filter(Boolean)
-                  .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
-
-                return rows.length === 0 ? (
-                  <p className={styles.gscHint}>No search data yet — posts may not be indexed or have no impressions in this 90-day window.</p>
-                ) : (
-                  <div className={styles.gscTable}>
-                    <div className={styles.gscHead}>
-                      <span>Post</span>
-                      <span>Clicks</span>
-                      <span>Impressions</span>
-                      <span>CTR</span>
-                      <span>Avg Position</span>
-                    </div>
-                    {rows.map(p => (
-                      <div key={p.id} className={styles.gscRow}>
-                        <div className={styles.gscPostCell}>
-                          <Link to={`/blog/${p.slug}`} className={styles.gscPostLink} target="_blank" rel="noopener noreferrer">
-                            {p.title}
-                          </Link>
-                          <span className={styles.gscAuthor}>{p.author?.name}</span>
-                        </div>
-                        <span className={`${styles.gscStat} ${styles.gscClicks}`}>{(p.clicks || 0).toLocaleString()}</span>
-                        <span className={styles.gscStat}>{(p.impressions || 0).toLocaleString()}</span>
-                        <span className={styles.gscStat}>{p.ctr ?? 0}%</span>
-                        <span className={`${styles.gscStat} ${
-                          (p.position || 99) <= 10 ? styles.gscPosGood :
-                          (p.position || 99) <= 20 ? styles.gscPosMid :
-                          styles.gscPosBad
-                        }`}>#{p.position ?? '—'}</span>
-                      </div>
-                    ))}
-                  </div>
-                )
-              })()}
+            {/* Google Search Console — requires server-side integration */}
+            <div className={styles.gscCard}>
+              <p className={styles.insightBoxTitle}>Google Search Performance</p>
+              <p className={styles.gscCardNote}>
+                Search Console data (clicks, impressions, CTR, ranking position) requires a server-side integration.
+                You can view live data directly at{' '}
+                <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">
+                  search.google.com/search-console
+                </a>.
+              </p>
             </div>
           </div>
         ) : (
