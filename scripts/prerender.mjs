@@ -124,6 +124,19 @@ const STATIC_ROUTES = [
 ]
 
 // ── Main ─────────────────────────────────────────────────────────────────────
+// ── Inject a static post link list into the blog index page ─────────────────
+// Googlebot reads <a> links from static HTML and follows them directly,
+// bypassing the sitemap crawl schedule. This is the fastest way to get
+// blog posts discovered and indexed without any manual GSC actions.
+function injectBlogLinks(html, posts) {
+  if (!posts.length) return html
+  const links = posts
+    .map(p => `<a href="${SITE}/blog/${p.slug}">${p.title}</a>`)
+    .join('\n    ')
+  const block = `\n  <nav id="__crawler_links" aria-label="Blog posts" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap">\n    ${links}\n  </nav>`
+  return html.replace('</body>', `${block}\n</body>`)
+}
+
 async function run() {
   console.log('Pre-rendering routes...')
   const base = readFileSync(resolve(process.cwd(), 'dist/index.html'), 'utf8')
@@ -167,6 +180,14 @@ async function run() {
     })
     write(resolve(process.cwd(), `dist/blog/${post.slug}/index.html`), html)
     console.log(`  ✓ /blog/${post.slug}`)
+  }
+
+  // Inject static <a> links into the blog index so Googlebot follows them
+  if (posts.length) {
+    const blogIndexPath = resolve(process.cwd(), 'dist/blog/index.html')
+    const blogHtml = readFileSync(blogIndexPath, 'utf8')
+    write(blogIndexPath, injectBlogLinks(blogHtml, posts))
+    console.log(`  ✓ injected ${posts.length} crawler links into /blog`)
   }
 
   console.log(`  Done — ${STATIC_ROUTES.length} static + ${posts.length} blog routes pre-rendered`)
