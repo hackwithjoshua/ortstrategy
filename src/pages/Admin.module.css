@@ -68,6 +68,43 @@
 /* Dashboard header right side */
 .dashHeaderRight { display: flex; align-items: center; gap: 12px; }
 
+/* Search */
+.searchWrap { position: relative; display: flex; align-items: center; }
+.searchIcon {
+  position: absolute; left: 10px; color: var(--text-muted);
+  font-size: 0.78rem; pointer-events: none;
+}
+.searchInput {
+  padding: 7px 32px 7px 30px; border-radius: 8px;
+  border: 1px solid var(--border-card); background: var(--bg-card);
+  color: var(--text-primary); font-size: 0.84rem; width: 220px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.searchInput:focus { border-color: var(--border-input-focus); box-shadow: 0 0 0 3px rgba(29,107,243,0.1); }
+.searchInput::placeholder { color: var(--text-muted); }
+.searchClear {
+  position: absolute; right: 8px; background: none; border: none;
+  color: var(--text-muted); cursor: pointer; font-size: 0.72rem;
+  padding: 2px; display: flex; align-items: center; line-height: 1;
+}
+.searchClear:hover { color: var(--text-primary); }
+
+/* Pagination */
+.paginationBar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 2px 4px;
+}
+.pageCount { font-size: 0.8rem; color: var(--text-muted); }
+.pageBtns { display: flex; align-items: center; gap: 10px; }
+.pageInfo { font-size: 0.8rem; color: var(--text-secondary); min-width: 90px; text-align: center; }
+.pageBtn {
+  padding: 6px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+  background: var(--bg-card); border: 1px solid var(--border-card);
+  color: var(--text-secondary); cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.pageBtn:hover:not(:disabled) { background: var(--bg-input); color: var(--text-primary); border-color: var(--border-input-focus); }
+.pageBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
 /* View toggle */
 .viewToggle {
   display: flex; align-items: center; gap: 2px;

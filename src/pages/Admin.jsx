@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   collection, addDoc, updateDoc, deleteDoc,
@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { FaPlus, FaEdit, FaTrash, FaEye, FaSignOutAlt, FaCheck, FaTimes,
   FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaQuoteRight, FaCode, FaImage,
-  FaList, FaTh } from 'react-icons/fa'
+  FaList, FaTh, FaSearch } from 'react-icons/fa'
 import { FiSun, FiMoon } from 'react-icons/fi'
 import { useTheme } from '../context/ThemeContext'
 import ortLogo from '../assets/ort-logo.png'
@@ -755,6 +755,8 @@ function MobileBlock() {
   )
 }
 
+const PAGE_SIZES = { list: 15, grid: 9 }
+
 export default function Admin() {
   const isMobile = useIsMobile()
   const { user, loading: authLoading, logout, isSuperAdmin } = useAuth()
@@ -765,6 +767,27 @@ export default function Admin() {
   const [viewMode, setViewMode] = useState('list')
   const [expandedTitle, setExpandedTitle] = useState(null)
   const [actionErr, setActionErr] = useState('')
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
+
+  // Client-side search — no extra DB reads, always instant
+  const filteredPosts = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return posts
+    return posts.filter(p =>
+      p.title?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q) ||
+      p.excerpt?.toLowerCase().includes(q) ||
+      (p.tags || []).some(t => t.toLowerCase().includes(q))
+    )
+  }, [posts, search])
+
+  // Reset to first page whenever search query or view mode changes
+  useEffect(() => { setPage(0) }, [search, viewMode])
+
+  const pageSize = PAGE_SIZES[viewMode]
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / pageSize))
+  const pagePosts = filteredPosts.slice(page * pageSize, (page + 1) * pageSize)
 
   const fetchPosts = async () => {
     setLoading(true)
@@ -862,6 +885,18 @@ export default function Admin() {
             <p className={styles.dashSub}>{posts.length} total · {posts.filter(p=>p.published).length} published</p>
           </div>
           <div className={styles.dashHeaderRight}>
+            <div className={styles.searchWrap}>
+              <FaSearch className={styles.searchIcon} />
+              <input
+                className={styles.searchInput}
+                placeholder="Search posts..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+              {search && (
+                <button className={styles.searchClear} onClick={() => setSearch('')} title="Clear"><FaTimes /></button>
+              )}
+            </div>
             <div className={styles.viewToggle}>
               <button className={`${styles.viewToggleBtn} ${viewMode==='list'?styles.viewToggleActive:''}`} onClick={()=>setViewMode('list')} title="List view"><FaList/></button>
               <button className={`${styles.viewToggleBtn} ${viewMode==='grid'?styles.viewToggleActive:''}`} onClick={()=>setViewMode('grid')} title="Grid view"><FaTh/></button>
@@ -881,77 +916,112 @@ export default function Admin() {
             <p>Create your first post to get started.</p>
             <button className={styles.newBtn} onClick={() => setCreating(true)}><FaPlus/> Create Post</button>
           </div>
-        ) : viewMode === 'list' ? (
-          <div className={styles.postList}>
-            {posts.map(post => (
-              <motion.div key={post.id} className={styles.postRow} layout initial={{opacity:0}} animate={{opacity:1}}>
-                <div className={styles.postInfo}>
-                  <div className={styles.postStatus}>
-                    <span className={`${styles.statusDot} ${post.published?styles.live:styles.draft}`}/>
-                    <span className={styles.statusText}>{post.published ? 'Live' : 'Draft'}</span>
-                  </div>
-                  <div>
-                    <p className={styles.postTitle}>{post.title}</p>
-                    <p className={styles.postMeta}>{post.category} · {formatDate(post.publishedAt)}</p>
-                  </div>
-                </div>
-                <div className={styles.postActions}>
-                  <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
-                  <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
-                  <button
-                    className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
-                    onClick={() => handleTogglePublish(post)}
-                    title={post.published ? 'Unpublish' : 'Publish'}
-                  >
-                    {post.published ? '⏸' : '🚀'}
-                  </button>
-                  {isSuperAdmin && (
-                    <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+        ) : filteredPosts.length === 0 ? (
+          <div className={styles.emptyDash}>
+            <span>🔍</span>
+            <h3>No results</h3>
+            <p>No posts match "<strong>{search}</strong>"</p>
+            <button className={styles.newBtn} onClick={() => setSearch('')}>Clear search</button>
           </div>
-        ) : (
-          <div className={styles.postGrid}>
-            {posts.map(post => {
-              const grad = GRADIENTS[post.title?.length % GRADIENTS.length]
-              const isExpanded = expandedTitle === post.id
-              return (
-                <motion.div key={post.id} className={styles.gridCard} layout initial={{opacity:0}} animate={{opacity:1}}>
-                  <div className={styles.gridCover} style={{ background: post.coverImage ? `url(${post.coverImage}) center/cover` : grad }}>
-                    <div className={styles.gridCoverOverlay} />
-                    <span className={`${styles.gridStatusDot} ${post.published ? styles.live : styles.draft}`} />
-                    <span className={styles.gridCat}>{post.category}</span>
-                  </div>
-                  <div className={styles.gridBody}>
-                    <p
-                      className={`${styles.gridTitle} ${isExpanded ? styles.gridTitleExpanded : ''}`}
-                      onClick={() => setExpandedTitle(isExpanded ? null : post.id)}
-                      title={isExpanded ? 'Click to collapse' : 'Click to expand'}
-                    >
-                      {post.title}
-                    </p>
-                    <p className={styles.gridMeta}>{formatDate(post.publishedAt)}</p>
-                    <div className={styles.gridActions}>
-                      <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
-                      <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
-                      <button
-                        className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
-                        onClick={() => handleTogglePublish(post)}
-                        title={post.published ? 'Unpublish' : 'Publish'}
-                      >
-                        {post.published ? '⏸' : '🚀'}
-                      </button>
-                      {isSuperAdmin && (
-                        <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
-                      )}
+        ) : viewMode === 'list' ? (
+          <>
+            <div className={styles.postList}>
+              {pagePosts.map(post => (
+                <motion.div key={post.id} className={styles.postRow} layout initial={{opacity:0}} animate={{opacity:1}}>
+                  <div className={styles.postInfo}>
+                    <div className={styles.postStatus}>
+                      <span className={`${styles.statusDot} ${post.published?styles.live:styles.draft}`}/>
+                      <span className={styles.statusText}>{post.published ? 'Live' : 'Draft'}</span>
+                    </div>
+                    <div>
+                      <p className={styles.postTitle}>{post.title}</p>
+                      <p className={styles.postMeta}>{post.category} · {formatDate(post.publishedAt)}</p>
                     </div>
                   </div>
+                  <div className={styles.postActions}>
+                    <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
+                    <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
+                    <button
+                      className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
+                      onClick={() => handleTogglePublish(post)}
+                      title={post.published ? 'Unpublish' : 'Publish'}
+                    >
+                      {post.published ? '⏸' : '🚀'}
+                    </button>
+                    {isSuperAdmin && (
+                      <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
+                    )}
+                  </div>
                 </motion.div>
-              )
-            })}
-          </div>
+              ))}
+            </div>
+            {filteredPosts.length > pageSize && (
+              <div className={styles.paginationBar}>
+                <span className={styles.pageCount}>
+                  {page * pageSize + 1}–{Math.min((page + 1) * pageSize, filteredPosts.length)} of {filteredPosts.length} posts
+                </span>
+                <div className={styles.pageBtns}>
+                  <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 0}>← Prev</button>
+                  <span className={styles.pageInfo}>Page {page + 1} of {totalPages}</span>
+                  <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>Next →</button>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className={styles.postGrid}>
+              {pagePosts.map(post => {
+                const grad = GRADIENTS[post.title?.length % GRADIENTS.length]
+                const isExpanded = expandedTitle === post.id
+                return (
+                  <motion.div key={post.id} className={styles.gridCard} layout initial={{opacity:0}} animate={{opacity:1}}>
+                    <div className={styles.gridCover} style={{ background: post.coverImage ? `url(${post.coverImage}) center/cover` : grad }}>
+                      <div className={styles.gridCoverOverlay} />
+                      <span className={`${styles.gridStatusDot} ${post.published ? styles.live : styles.draft}`} />
+                      <span className={styles.gridCat}>{post.category}</span>
+                    </div>
+                    <div className={styles.gridBody}>
+                      <p
+                        className={`${styles.gridTitle} ${isExpanded ? styles.gridTitleExpanded : ''}`}
+                        onClick={() => setExpandedTitle(isExpanded ? null : post.id)}
+                        title={isExpanded ? 'Click to collapse' : 'Click to expand'}
+                      >
+                        {post.title}
+                      </p>
+                      <p className={styles.gridMeta}>{formatDate(post.publishedAt)}</p>
+                      <div className={styles.gridActions}>
+                        <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
+                        <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
+                        <button
+                          className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
+                          onClick={() => handleTogglePublish(post)}
+                          title={post.published ? 'Unpublish' : 'Publish'}
+                        >
+                          {post.published ? '⏸' : '🚀'}
+                        </button>
+                        {isSuperAdmin && (
+                          <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+            {filteredPosts.length > pageSize && (
+              <div className={styles.paginationBar}>
+                <span className={styles.pageCount}>
+                  {page * pageSize + 1}–{Math.min((page + 1) * pageSize, filteredPosts.length)} of {filteredPosts.length} posts
+                </span>
+                <div className={styles.pageBtns}>
+                  <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 0}>← Prev</button>
+                  <span className={styles.pageInfo}>Page {page + 1} of {totalPages}</span>
+                  <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>Next →</button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
