@@ -5,6 +5,7 @@ import {
   doc, query, where, getDocs, serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../firebase'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { FaPlus, FaEdit, FaTrash, FaEye, FaSignOutAlt, FaCheck, FaTimes,
@@ -769,25 +770,65 @@ export default function Admin() {
   const [actionErr, setActionErr] = useState('')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
+  const [tab, setTab] = useState('posts')
+  const [authorFilter, setAuthorFilter] = useState(null)
+  const [gscData, setGscData] = useState(null)
+  const [gscLoading, setGscLoading] = useState(false)
+  const [gscErr, setGscErr] = useState('')
 
-  // Client-side search — no extra DB reads, always instant
+  // Client-side search + optional author filter — no extra DB reads, always instant
   const filteredPosts = useMemo(() => {
+    let result = authorFilter ? posts.filter(p => p.author?.email === authorFilter) : posts
     const q = search.trim().toLowerCase()
-    if (!q) return posts
-    return posts.filter(p =>
+    if (!q) return result
+    return result.filter(p =>
       p.title?.toLowerCase().includes(q) ||
       p.category?.toLowerCase().includes(q) ||
       p.excerpt?.toLowerCase().includes(q) ||
       (p.tags || []).some(t => t.toLowerCase().includes(q))
     )
-  }, [posts, search])
+  }, [posts, search, authorFilter])
 
-  // Reset to first page whenever search query or view mode changes
-  useEffect(() => { setPage(0) }, [search, viewMode])
+  // Reset to first page whenever search query, view mode, or author filter changes
+  useEffect(() => { setPage(0) }, [search, viewMode, authorFilter])
 
   const pageSize = PAGE_SIZES[viewMode]
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / pageSize))
   const pagePosts = filteredPosts.slice(page * pageSize, (page + 1) * pageSize)
+
+  // Author-level stats computed from posts already in memory — zero extra DB reads
+  const authorStats = useMemo(() => {
+    const now = new Date()
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const map = {}
+    for (const post of posts) {
+      const name = post.author?.name || 'Unknown'
+      const email = post.author?.email || 'unknown'
+      if (!map[email]) map[email] = { name, email, total: 0, thisMonth: 0, lastMonth: 0, published: 0, draft: 0 }
+      map[email].total++
+      if (post.published) map[email].published++; else map[email].draft++
+      const pd = post.publishedAt?.toDate?.() || null
+      if (pd) {
+        if (pd >= thisMonthStart) map[email].thisMonth++
+        else if (pd >= lastMonthStart) map[email].lastMonth++
+      }
+    }
+    return Object.values(map).sort((a, b) => b.total - a.total)
+  }, [posts])
+
+  // Published post counts for the last 6 months
+  const monthlyStats = useMemo(() => {
+    const now = new Date()
+    return Array.from({ length: 6 }, (_, i) => {
+      const start = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+      const end = new Date(now.getFullYear(), now.getMonth() - (5 - i) + 1, 1)
+      return {
+        label: start.toLocaleDateString('en-US', { month: 'short' }),
+        count: posts.filter(p => { const pd = p.publishedAt?.toDate?.() || null; return pd && pd >= start && pd < end && p.published }).length,
+      }
+    })
+  }, [posts])
 
   const fetchPosts = async () => {
     setLoading(true)
@@ -802,6 +843,20 @@ export default function Admin() {
       setPosts(data)
     } catch(e) { console.error(e) }
     finally { setLoading(false) }
+  }
+
+  const loadGscData = async () => {
+    setGscLoading(true)
+    setGscErr('')
+    try {
+      const fn = httpsCallable(getFunctions(), 'getSearchInsights')
+      const { data } = await fn()
+      setGscData(data)
+    } catch(e) {
+      setGscErr(e.message || 'Could not load search data')
+    } finally {
+      setGscLoading(false)
+    }
   }
 
   useEffect(() => { if (user) fetchPosts() }, [user])
@@ -881,147 +936,324 @@ export default function Admin() {
         )}
         <div className={styles.dashHeader}>
           <div>
-            <h1 className={styles.dashTitle}>Posts</h1>
-            <p className={styles.dashSub}>{posts.length} total · {posts.filter(p=>p.published).length} published</p>
+            <h1 className={styles.dashTitle}>{tab === 'insights' ? 'Insights' : 'Posts'}</h1>
+            <p className={styles.dashSub}>
+              {posts.length} total · {posts.filter(p=>p.published).length} published
+              {authorFilter && <> · filtered by <strong>{authorStats.find(a=>a.email===authorFilter)?.name}</strong></>}
+            </p>
           </div>
           <div className={styles.dashHeaderRight}>
-            <div className={styles.searchWrap}>
-              <FaSearch className={styles.searchIcon} />
-              <input
-                className={styles.searchInput}
-                placeholder="Search posts..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-              {search && (
-                <button className={styles.searchClear} onClick={() => setSearch('')} title="Clear"><FaTimes /></button>
-              )}
-            </div>
-            <div className={styles.viewToggle}>
-              <button className={`${styles.viewToggleBtn} ${viewMode==='list'?styles.viewToggleActive:''}`} onClick={()=>setViewMode('list')} title="List view"><FaList/></button>
-              <button className={`${styles.viewToggleBtn} ${viewMode==='grid'?styles.viewToggleActive:''}`} onClick={()=>setViewMode('grid')} title="Grid view"><FaTh/></button>
-            </div>
+            {tab === 'posts' && (
+              <>
+                <div className={styles.searchWrap}>
+                  <FaSearch className={styles.searchIcon} />
+                  <input
+                    className={styles.searchInput}
+                    placeholder="Search posts..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                  {search && (
+                    <button className={styles.searchClear} onClick={() => setSearch('')} title="Clear"><FaTimes /></button>
+                  )}
+                </div>
+                <div className={styles.viewToggle}>
+                  <button className={`${styles.viewToggleBtn} ${viewMode==='list'?styles.viewToggleActive:''}`} onClick={()=>setViewMode('list')} title="List view"><FaList/></button>
+                  <button className={`${styles.viewToggleBtn} ${viewMode==='grid'?styles.viewToggleActive:''}`} onClick={()=>setViewMode('grid')} title="Grid view"><FaTh/></button>
+                </div>
+              </>
+            )}
             <button className={styles.newBtn} onClick={() => setCreating(true)}>
               <FaPlus/> New Post
             </button>
           </div>
         </div>
 
-        {loading ? (
-          <div className={styles.loadWrap}><div className={styles.spinner}/></div>
-        ) : posts.length === 0 ? (
-          <div className={styles.emptyDash}>
-            <span>✍️</span>
-            <h3>No posts yet</h3>
-            <p>Create your first post to get started.</p>
-            <button className={styles.newBtn} onClick={() => setCreating(true)}><FaPlus/> Create Post</button>
-          </div>
-        ) : filteredPosts.length === 0 ? (
-          <div className={styles.emptyDash}>
-            <span>🔍</span>
-            <h3>No results</h3>
-            <p>No posts match "<strong>{search}</strong>"</p>
-            <button className={styles.newBtn} onClick={() => setSearch('')}>Clear search</button>
-          </div>
-        ) : viewMode === 'list' ? (
-          <>
-            <div className={styles.postList}>
-              {pagePosts.map(post => (
-                <motion.div key={post.id} className={styles.postRow} layout initial={{opacity:0}} animate={{opacity:1}}>
-                  <div className={styles.postInfo}>
-                    <div className={styles.postStatus}>
-                      <span className={`${styles.statusDot} ${post.published?styles.live:styles.draft}`}/>
-                      <span className={styles.statusText}>{post.published ? 'Live' : 'Draft'}</span>
-                    </div>
-                    <div>
-                      <p className={styles.postTitle}>{post.title}</p>
-                      <p className={styles.postMeta}>{post.category} · {formatDate(post.publishedAt)}</p>
-                    </div>
-                  </div>
-                  <div className={styles.postActions}>
-                    <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
-                    <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
-                    <button
-                      className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
-                      onClick={() => handleTogglePublish(post)}
-                      title={post.published ? 'Unpublish' : 'Publish'}
-                    >
-                      {post.published ? '⏸' : '🚀'}
-                    </button>
-                    {isSuperAdmin && (
-                      <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
-                    )}
-                  </div>
-                </motion.div>
+        {/* Tab bar */}
+        <div className={styles.tabBar}>
+          <button className={`${styles.tabBtn} ${tab==='posts'?styles.tabBtnActive:''}`} onClick={() => setTab('posts')}>
+            Posts
+          </button>
+          <button className={`${styles.tabBtn} ${tab==='insights'?styles.tabBtnActive:''}`} onClick={() => setTab('insights')}>
+            📊 Insights
+          </button>
+          {authorFilter && (
+            <button className={styles.filterTag} onClick={() => setAuthorFilter(null)}>
+              By: {authorStats.find(a=>a.email===authorFilter)?.name} ×
+            </button>
+          )}
+        </div>
+
+        {tab === 'insights' ? (
+          /* ── Insights tab ── */
+          <div className={styles.insightsWrap}>
+            {/* Summary cards */}
+            <div className={styles.insightsSummary}>
+              {[
+                { label: 'Total Posts', value: posts.length, color: '#1d6bf3' },
+                { label: 'Published', value: posts.filter(p=>p.published).length, color: '#10b981' },
+                { label: 'Drafts', value: posts.filter(p=>!p.published).length, color: '#f59e0b' },
+                { label: 'Authors', value: authorStats.length, color: '#8b5cf6' },
+              ].map(s => (
+                <div key={s.label} className={styles.summaryCard} style={{ borderTopColor: s.color }}>
+                  <span className={styles.summaryNum} style={{ color: s.color }}>{s.value}</span>
+                  <span className={styles.summaryLabel}>{s.label}</span>
+                </div>
               ))}
             </div>
-            {filteredPosts.length > pageSize && (
-              <div className={styles.paginationBar}>
-                <span className={styles.pageCount}>
-                  {page * pageSize + 1}–{Math.min((page + 1) * pageSize, filteredPosts.length)} of {filteredPosts.length} posts
-                </span>
-                <div className={styles.pageBtns}>
-                  <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 0}>← Prev</button>
-                  <span className={styles.pageInfo}>Page {page + 1} of {totalPages}</span>
-                  <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>Next →</button>
+
+            <div className={styles.insightsGrid}>
+              {/* Author table */}
+              <div className={styles.insightBox}>
+                <p className={styles.insightBoxTitle}>Posts by Author</p>
+                <div className={styles.authorTable}>
+                  <div className={styles.authorHead}>
+                    <span>Author</span>
+                    <span>Total</span>
+                    <span>This Month</span>
+                    <span>Last Month</span>
+                    <span>Live</span>
+                    <span>Draft</span>
+                  </div>
+                  {authorStats.length === 0 ? (
+                    <p className={styles.insightEmpty}>No posts yet.</p>
+                  ) : authorStats.map(a => (
+                    <div key={a.email} className={styles.authorRow}>
+                      <div className={styles.authorCell}>
+                        <div className={styles.authorAvatar}>{a.name.charAt(0).toUpperCase()}</div>
+                        <div>
+                          <p className={styles.authorName}>{a.name}</p>
+                          <p className={styles.authorEmail}>{a.email}</p>
+                        </div>
+                      </div>
+                      <span className={`${styles.authorStat} ${styles.authorTotal}`}>{a.total}</span>
+                      <span className={styles.authorStat}>{a.thisMonth}</span>
+                      <span className={styles.authorStat}>{a.lastMonth}</span>
+                      <span className={`${styles.authorStat} ${styles.authorLive}`}>{a.published}</span>
+                      <span className={`${styles.authorStat} ${styles.authorDraft}`}>{a.draft}</span>
+                      <button
+                        className={styles.viewAuthorBtn}
+                        onClick={() => { setAuthorFilter(a.email); setTab('posts') }}
+                        title={`View ${a.name}'s posts`}
+                      >
+                        View →
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
-            )}
-          </>
-        ) : (
-          <>
-            <div className={styles.postGrid}>
-              {pagePosts.map(post => {
-                const grad = GRADIENTS[post.title?.length % GRADIENTS.length]
-                const isExpanded = expandedTitle === post.id
-                return (
-                  <motion.div key={post.id} className={styles.gridCard} layout initial={{opacity:0}} animate={{opacity:1}}>
-                    <div className={styles.gridCover} style={{ background: post.coverImage ? `url(${post.coverImage}) center/cover` : grad }}>
-                      <div className={styles.gridCoverOverlay} />
-                      <span className={`${styles.gridStatusDot} ${post.published ? styles.live : styles.draft}`} />
-                      <span className={styles.gridCat}>{post.category}</span>
+
+              {/* Monthly chart */}
+              <div className={styles.insightBox}>
+                <p className={styles.insightBoxTitle}>Published Posts — Last 6 Months</p>
+                {(() => {
+                  const max = Math.max(...monthlyStats.map(m => m.count), 1)
+                  return (
+                    <div className={styles.monthChart}>
+                      {monthlyStats.map(m => (
+                        <div key={m.label} className={styles.monthCol}>
+                          <span className={styles.monthCount}>{m.count || ''}</span>
+                          <div className={styles.monthBarWrap}>
+                            <div
+                              className={styles.monthBarFill}
+                              style={{ height: `${Math.round((m.count / max) * 100)}%` }}
+                            />
+                          </div>
+                          <span className={styles.monthLabel}>{m.label}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className={styles.gridBody}>
-                      <p
-                        className={`${styles.gridTitle} ${isExpanded ? styles.gridTitleExpanded : ''}`}
-                        onClick={() => setExpandedTitle(isExpanded ? null : post.id)}
-                        title={isExpanded ? 'Click to collapse' : 'Click to expand'}
-                      >
-                        {post.title}
-                      </p>
-                      <p className={styles.gridMeta}>{formatDate(post.publishedAt)}</p>
-                      <div className={styles.gridActions}>
-                        <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
-                        <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
-                        <button
-                          className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
-                          onClick={() => handleTogglePublish(post)}
-                          title={post.published ? 'Unpublish' : 'Publish'}
-                        >
-                          {post.published ? '⏸' : '🚀'}
-                        </button>
-                        {isSuperAdmin && (
-                          <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
-                        )}
+                  )
+                })()}
+              </div>
+            </div>
+
+            {/* Google Search Console live data */}
+            <div className={styles.gscSection}>
+              <div className={styles.gscHeader}>
+                <div>
+                  <p className={styles.insightBoxTitle}>Google Search Performance — last 90 days</p>
+                  {gscData?.period && <p className={styles.gscPeriod}>{gscData.period}</p>}
+                </div>
+                <button className={styles.gscLoadBtn} onClick={loadGscData} disabled={gscLoading}>
+                  {gscLoading
+                    ? <><span className={styles.btnSpinner}/> Loading...</>
+                    : gscData ? '↻ Refresh' : '🔍 Load Search Data'}
+                </button>
+              </div>
+
+              {gscErr && <p className={styles.gscErr}>⚠ {gscErr}</p>}
+
+              {!gscData && !gscLoading && !gscErr && (
+                <p className={styles.gscHint}>
+                  Click "Load Search Data" to pull real clicks, impressions, CTR and ranking position from Google Search Console for every post.
+                </p>
+              )}
+
+              {gscData && (() => {
+                const SITE = 'https://www.ortstrategy.com'
+                const rows = posts
+                  .map(p => {
+                    const stats =
+                      gscData.rows[`${SITE}/blog/${p.slug}/`] ||
+                      gscData.rows[`${SITE}/blog/${p.slug}`] || null
+                    return stats ? { ...p, ...stats } : null
+                  })
+                  .filter(Boolean)
+                  .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+
+                return rows.length === 0 ? (
+                  <p className={styles.gscHint}>No search data yet — posts may not be indexed or have no impressions in this 90-day window.</p>
+                ) : (
+                  <div className={styles.gscTable}>
+                    <div className={styles.gscHead}>
+                      <span>Post</span>
+                      <span>Clicks</span>
+                      <span>Impressions</span>
+                      <span>CTR</span>
+                      <span>Avg Position</span>
+                    </div>
+                    {rows.map(p => (
+                      <div key={p.id} className={styles.gscRow}>
+                        <div className={styles.gscPostCell}>
+                          <Link to={`/blog/${p.slug}`} className={styles.gscPostLink} target="_blank" rel="noopener noreferrer">
+                            {p.title}
+                          </Link>
+                          <span className={styles.gscAuthor}>{p.author?.name}</span>
+                        </div>
+                        <span className={`${styles.gscStat} ${styles.gscClicks}`}>{(p.clicks || 0).toLocaleString()}</span>
+                        <span className={styles.gscStat}>{(p.impressions || 0).toLocaleString()}</span>
+                        <span className={styles.gscStat}>{p.ctr ?? 0}%</span>
+                        <span className={`${styles.gscStat} ${
+                          (p.position || 99) <= 10 ? styles.gscPosGood :
+                          (p.position || 99) <= 20 ? styles.gscPosMid :
+                          styles.gscPosBad
+                        }`}>#{p.position ?? '—'}</span>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+            </div>
+          </div>
+        ) : (
+          /* ── Posts tab ── */
+          loading ? (
+            <div className={styles.loadWrap}><div className={styles.spinner}/></div>
+          ) : posts.length === 0 ? (
+            <div className={styles.emptyDash}>
+              <span>✍️</span>
+              <h3>No posts yet</h3>
+              <p>Create your first post to get started.</p>
+              <button className={styles.newBtn} onClick={() => setCreating(true)}><FaPlus/> Create Post</button>
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className={styles.emptyDash}>
+              <span>🔍</span>
+              <h3>No results</h3>
+              <p>No posts match {authorFilter ? `for this author` : `"${search}"`}</p>
+              <button className={styles.newBtn} onClick={() => { setSearch(''); setAuthorFilter(null) }}>Clear filters</button>
+            </div>
+          ) : viewMode === 'list' ? (
+            <>
+              <div className={styles.postList}>
+                {pagePosts.map(post => (
+                  <motion.div key={post.id} className={styles.postRow} layout initial={{opacity:0}} animate={{opacity:1}}>
+                    <div className={styles.postInfo}>
+                      <div className={styles.postStatus}>
+                        <span className={`${styles.statusDot} ${post.published?styles.live:styles.draft}`}/>
+                        <span className={styles.statusText}>{post.published ? 'Live' : 'Draft'}</span>
+                      </div>
+                      <div>
+                        <p className={styles.postTitle}>{post.title}</p>
+                        <p className={styles.postMeta}>{post.category} · {formatDate(post.publishedAt)} · {post.author?.name || 'Unknown'}</p>
                       </div>
                     </div>
+                    <div className={styles.postActions}>
+                      <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
+                      <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
+                      <button
+                        className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
+                        onClick={() => handleTogglePublish(post)}
+                        title={post.published ? 'Unpublish' : 'Publish'}
+                      >
+                        {post.published ? '⏸' : '🚀'}
+                      </button>
+                      {isSuperAdmin && (
+                        <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
+                      )}
+                    </div>
                   </motion.div>
-                )
-              })}
-            </div>
-            {filteredPosts.length > pageSize && (
-              <div className={styles.paginationBar}>
-                <span className={styles.pageCount}>
-                  {page * pageSize + 1}–{Math.min((page + 1) * pageSize, filteredPosts.length)} of {filteredPosts.length} posts
-                </span>
-                <div className={styles.pageBtns}>
-                  <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 0}>← Prev</button>
-                  <span className={styles.pageInfo}>Page {page + 1} of {totalPages}</span>
-                  <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>Next →</button>
-                </div>
+                ))}
               </div>
-            )}
-          </>
+              {filteredPosts.length > pageSize && (
+                <div className={styles.paginationBar}>
+                  <span className={styles.pageCount}>
+                    {page * pageSize + 1}–{Math.min((page + 1) * pageSize, filteredPosts.length)} of {filteredPosts.length} posts
+                  </span>
+                  <div className={styles.pageBtns}>
+                    <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 0}>← Prev</button>
+                    <span className={styles.pageInfo}>Page {page + 1} of {totalPages}</span>
+                    <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>Next →</button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className={styles.postGrid}>
+                {pagePosts.map(post => {
+                  const grad = GRADIENTS[post.title?.length % GRADIENTS.length]
+                  const isExpanded = expandedTitle === post.id
+                  return (
+                    <motion.div key={post.id} className={styles.gridCard} layout initial={{opacity:0}} animate={{opacity:1}}>
+                      <div className={styles.gridCover} style={{ background: post.coverImage ? `url(${post.coverImage}) center/cover` : grad }}>
+                        <div className={styles.gridCoverOverlay} />
+                        <span className={`${styles.gridStatusDot} ${post.published ? styles.live : styles.draft}`} />
+                        <span className={styles.gridCat}>{post.category}</span>
+                      </div>
+                      <div className={styles.gridBody}>
+                        <p
+                          className={`${styles.gridTitle} ${isExpanded ? styles.gridTitleExpanded : ''}`}
+                          onClick={() => setExpandedTitle(isExpanded ? null : post.id)}
+                          title={isExpanded ? 'Click to collapse' : 'Click to expand'}
+                        >
+                          {post.title}
+                        </p>
+                        <p className={styles.gridMeta}>{post.author?.name || 'Unknown'} · {formatDate(post.publishedAt)}</p>
+                        <div className={styles.gridActions}>
+                          <Link to={`/blog/${post.slug}`} className={styles.actionBtn} title="Preview" target="_blank" rel="noopener noreferrer"><FaEye/></Link>
+                          <button className={styles.actionBtn} onClick={() => setEditing(post)} title="Edit"><FaEdit/></button>
+                          <button
+                            className={`${styles.actionBtn} ${post.published ? styles.unpublishActionBtn : styles.publishActionBtn}`}
+                            onClick={() => handleTogglePublish(post)}
+                            title={post.published ? 'Unpublish' : 'Publish'}
+                          >
+                            {post.published ? '⏸' : '🚀'}
+                          </button>
+                          {isSuperAdmin && (
+                            <button className={`${styles.actionBtn} ${styles.deleteBtn}`} onClick={() => handleDelete(post.id)} title="Delete"><FaTrash/></button>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+              {filteredPosts.length > pageSize && (
+                <div className={styles.paginationBar}>
+                  <span className={styles.pageCount}>
+                    {page * pageSize + 1}–{Math.min((page + 1) * pageSize, filteredPosts.length)} of {filteredPosts.length} posts
+                  </span>
+                  <div className={styles.pageBtns}>
+                    <button className={styles.pageBtn} onClick={() => setPage(p => p - 1)} disabled={page === 0}>← Prev</button>
+                    <span className={styles.pageInfo}>Page {page + 1} of {totalPages}</span>
+                    <button className={styles.pageBtn} onClick={() => setPage(p => p + 1)} disabled={page >= totalPages - 1}>Next →</button>
+                  </div>
+                </div>
+              )}
+            </>
+          )
         )}
       </div>
     </div>
