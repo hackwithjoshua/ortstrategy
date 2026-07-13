@@ -425,9 +425,47 @@
   animation: spin 0.7s linear infinite;
 }
 
+/* ── Editor mode: viewport-locked so only contentArea scrolls ── */
+.editorMode {
+  height: 100vh;
+  overflow: hidden;
+}
+.editorMode .editorGrid {
+  overflow: hidden;
+  min-height: 0;
+}
+.editorMode .editorMain {
+  overflow: hidden;
+  min-height: 0;
+}
+/* Content field grows to fill remaining height */
+.contentField {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.contentField .mdEditor {
+  flex: 1;
+  min-height: 0;
+}
+/* contentArea fills available space and scrolls */
+.editorMode .contentArea {
+  flex: 1;
+  min-height: 0;
+}
+/* preview panel also scrolls in locked layout */
+.editorMode .mdPreview {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 /* ── Editor ── */
 .editor { flex: 1; display: flex; flex-direction: column; }
 .editorHeader {
+  position: sticky; top: 64px; z-index: 50;
   padding: 20px 40px; border-bottom: 1px solid var(--border-card);
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   background: var(--bg-card);
@@ -545,11 +583,42 @@
   white-space: pre-line;
 }
 .editorImg {
-  max-width: 100%; display: block; margin: 12px 0;
+  max-width: 100%; display: block; margin: 0;
   border-radius: 8px; cursor: default;
   outline: 2px solid transparent; transition: outline-color 0.15s;
 }
 .editorImg:hover { outline-color: var(--blue-bright); }
+
+/* Image wrapper + remove button */
+.imgWrap {
+  display: block;
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 10px 0;
+  line-height: 0;
+}
+.imgRemoveBtn {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(8, 14, 30, 0.72);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 15px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  z-index: 10;
+}
+.imgWrap:hover .imgRemoveBtn { opacity: 1; }
+.imgRemoveBtn:hover {
+  background: rgba(239, 68, 68, 0.88);
+  border-color: rgba(239, 68, 68, 0.5);
+}
 
 /* Markdown editor */
 .mdEditor { display: flex; flex-direction: column; border: 1px solid var(--border-input); border-radius: 10px; overflow: hidden; }
@@ -559,6 +628,7 @@
   display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
   padding: 8px 10px; background: var(--bg-card);
   border-bottom: 1px solid var(--border-card);
+  flex-shrink: 0;
 }
 .toolbarBtn {
   display: inline-flex; align-items: center; gap: 4px;

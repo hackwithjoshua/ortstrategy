@@ -60,7 +60,7 @@ function expandTokens(text, map) {
 }
 
 // Render tokenized markdown to HTML for the contentEditable display area
-// Images become real <img> elements; everything else is plain text with <br> for newlines
+// Images become real <img> elements wrapped in a span with an X remove button
 function tokenizedToEditHtml(text, map) {
   const parts = (text || '').split(/(!\[[^\]]*\]\(@img:[a-z0-9]+\))/g)
   return parts.map(part => {
@@ -70,7 +70,12 @@ function tokenizedToEditHtml(text, map) {
       const img = map[id]
       if (!img) return ''
       const esc = s => s.replace(/"/g, '&quot;')
-      return `<img src="${img.src}" alt="${esc(alt)}" data-id="${id}" contenteditable="false" class="${styles.editorImg}" />`
+      return (
+        `<span contenteditable="false" data-img-wrap="1" class="${styles.imgWrap}">` +
+        `<img src="${img.src}" alt="${esc(alt)}" data-id="${id}" contenteditable="false" class="${styles.editorImg}" />` +
+        `<button type="button" class="${styles.imgRemoveBtn}" data-remove-id="${id}" title="Remove image">×</button>` +
+        `</span>`
+      )
     }
     return part
       .replace(/&/g, '&amp;')
@@ -94,6 +99,14 @@ function editHtmlToTokenized(html) {
       if (id) out += `\n![${alt}](@img:${id})\n`
     } else if (node.nodeName === 'BR') {
       out += '\n'
+    } else if (node.nodeType === 1 && node.hasAttribute('data-img-wrap')) {
+      // image wrapper span — pull the img token, ignore the remove button text
+      const img = node.querySelector('img[data-id]')
+      if (img) {
+        const id = img.getAttribute('data-id')
+        const alt = img.getAttribute('alt') || ''
+        if (id) out += `\n![${alt}](@img:${id})\n`
+      }
     } else {
       const isBlock = /^(DIV|P|H[1-6]|LI|BLOCKQUOTE)$/.test(node.nodeName)
       if (isBlock && out.length > 0 && !out.endsWith('\n')) out += '\n'
@@ -147,6 +160,27 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
     return () => document.removeEventListener('selectionchange', handler)
   }, [])
 
+  // Remove image when X button is clicked (event delegation)
+  useEffect(() => {
+    const editor = editorRef.current
+    if (!editor) return
+    const onClick = (e) => {
+      const btn = e.target.closest('[data-remove-id]')
+      if (!btn) return
+      e.preventDefault()
+      const id = btn.getAttribute('data-remove-id')
+      const wrap = btn.closest('[data-img-wrap]')
+      if (!wrap) return
+      wrap.parentNode?.removeChild(wrap)
+      delete imgMap.current[id]
+      const tokenized = editHtmlToTokenized(editor.innerHTML)
+      const expanded = expandTokens(tokenized, imgMap.current)
+      onChange(expanded)
+    }
+    editor.addEventListener('click', onClick)
+    return () => editor.removeEventListener('click', onClick)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Read the current tokenized content from the editor DOM
   const getTokenized = () => editorRef.current ? editHtmlToTokenized(editorRef.current.innerHTML) : ''
 
@@ -197,22 +231,39 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
     imgMap.current[id] = { src, alt }
     editorRef.current?.focus()
     const sel = window.getSelection()
+
+    const wrap = document.createElement('span')
+    wrap.contentEditable = 'false'
+    wrap.setAttribute('data-img-wrap', '1')
+    wrap.className = styles.imgWrap
+
     const el = document.createElement('img')
     el.src = src
     el.alt = alt
     el.setAttribute('data-id', id)
     el.contentEditable = 'false'
     el.className = styles.editorImg
+
+    const rmBtn = document.createElement('button')
+    rmBtn.type = 'button'
+    rmBtn.className = styles.imgRemoveBtn
+    rmBtn.setAttribute('data-remove-id', id)
+    rmBtn.title = 'Remove image'
+    rmBtn.textContent = '×'
+
+    wrap.appendChild(el)
+    wrap.appendChild(rmBtn)
+
     if (sel?.rangeCount) {
       const range = sel.getRangeAt(0)
       range.deleteContents()
-      range.insertNode(el)
-      range.setStartAfter(el)
+      range.insertNode(wrap)
+      range.setStartAfter(wrap)
       range.collapse(true)
       sel.removeAllRanges()
       sel.addRange(range)
     } else {
-      editorRef.current?.appendChild(el)
+      editorRef.current?.appendChild(wrap)
     }
     handleInput()
   }
@@ -641,7 +692,7 @@ function PostEditor({ post, onSave, onCancel }) {
             <label>Title *</label>
             <input value={form.title} onChange={e=>handleTitleChange(e.target.value)} placeholder="Post title..."/>
           </div>
-          <div className={styles.field}>
+          <div className={`${styles.field} ${styles.contentField}`}>
             <label>Content *</label>
             <MarkdownEditor key={post?.id || 'new'} value={form.content} onChange={v => set('content', v)} onOpenLibrary={openLibrary} />
           </div>
@@ -880,7 +931,7 @@ export default function Admin() {
 
   if (creating || editing) {
     return (
-      <div className={styles.page}>
+      <div className={`${styles.page} ${styles.editorMode}`}>
         <div className={styles.topBar}>
           <img src={ortLogo} alt="ORT Strategy" className={styles.barLogo}/>
           <button className={styles.logoutBtn} onClick={logout}><FaSignOutAlt/> Logout</button>
