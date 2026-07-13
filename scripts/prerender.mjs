@@ -25,6 +25,41 @@ function loadEnv() {
 const env = loadEnv()
 const PROJECT_ID = env.VITE_FIREBASE_PROJECT_ID
 
+// ── Convert stored markdown + @img tokens → plain crawlable HTML ─────────────
+function markdownToNoscriptHtml(md) {
+  if (!md) return ''
+  return md
+    // Strip image tokens (@img:ID and standard markdown images)
+    .replace(/!\[[^\]]*\]\(@img:[^\)]+\)/g, '')
+    .replace(/!\[[^\]]*\]\([^\)]+\)/g, '')
+    // ATX headings
+    .replace(/^#{4,6}\s+(.+)$/gm, '<h4>$1</h4>')
+    .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+    .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
+    .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>')
+    // Bold and italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Unordered list items
+    .replace(/^[-*+]\s+(.+)$/gm, '<li>$1</li>')
+    // Ordered list items
+    .replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>')
+    // Blockquote
+    .replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>')
+    // Horizontal rule
+    .replace(/^[-*_]{3,}$/gm, '<hr>')
+    // Wrap consecutive <li> runs in <ul>
+    .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+    // Non-empty lines that aren't already block tags become paragraphs
+    .replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>')
+    // Collapse excess blank lines
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 // ── Fetch all published posts from Firestore REST API ───────────────────────
 async function fetchPosts() {
   if (!PROJECT_ID) return []
@@ -41,7 +76,7 @@ async function fetchPosts() {
             { fieldPath: 'slug' }, { fieldPath: 'title' },
             { fieldPath: 'excerpt' }, { fieldPath: 'coverImage' },
             { fieldPath: 'category' }, { fieldPath: 'author' },
-            { fieldPath: 'publishedAt' },
+            { fieldPath: 'publishedAt' }, { fieldPath: 'content' },
           ]},
         },
       }),
@@ -57,6 +92,7 @@ async function fetchPosts() {
         category:  f.category?.stringValue || '',
         author:    f.author?.mapValue?.fields?.name?.stringValue || 'OrtStrategy',
         publishedAt: r.document.updateTime?.split('T')[0] || '',
+        content:   f.content?.stringValue || '',
       }
     })
   } catch(e) {
@@ -187,7 +223,7 @@ async function run() {
   const posts = await fetchPosts()
   for (const post of posts) {
     const canonical = `${SITE}/blog/${post.slug}`
-    const html = inject(base, {
+    let html = inject(base, {
       title: post.title,
       description: post.excerpt || post.title,
       canonical,
@@ -209,6 +245,17 @@ async function run() {
         url: canonical,
       },
     })
+    const bodyHtml = markdownToNoscriptHtml(post.content)
+    const noscript = `<noscript>
+    <article>
+      <h1>${post.title}</h1>
+      ${post.category ? `<p><strong>Category:</strong> ${post.category}</p>` : ''}
+      ${post.author ? `<p><strong>By</strong> ${post.author}${post.publishedAt ? ` · ${post.publishedAt}` : ''}</p>` : ''}
+      ${post.excerpt ? `<p>${post.excerpt}</p>` : ''}
+      ${bodyHtml}
+    </article>
+  </noscript>`
+    html = html.replace('</body>', `\n  ${noscript}\n</body>`)
     write(resolve(process.cwd(), `dist/blog/${post.slug}/index.html`), html)
     console.log(`  ✓ /blog/${post.slug}`)
   }
