@@ -425,43 +425,6 @@
   animation: spin 0.7s linear infinite;
 }
 
-/* ── Editor mode: viewport-locked so only contentArea scrolls ── */
-.editorMode {
-  height: 100vh;
-  overflow: hidden;
-}
-.editorMode .editorGrid {
-  overflow: hidden;
-  min-height: 0;
-}
-.editorMode .editorMain {
-  overflow: hidden;
-  min-height: 0;
-}
-/* Content field grows to fill remaining height */
-.contentField {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.contentField .mdEditor {
-  flex: 1;
-  min-height: 0;
-}
-/* contentArea fills available space and scrolls */
-.editorMode .contentArea {
-  flex: 1;
-  min-height: 0;
-}
-/* preview panel also scrolls in locked layout */
-.editorMode .mdPreview {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
 /* ── Editor ── */
 .editor { flex: 1; display: flex; flex-direction: column; }
 .editorHeader {
@@ -569,7 +532,9 @@
 .hint { font-size: 0.68rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-muted); }
 .lockedHint { font-size: 0.66rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: #f59e0b; }
 .contentArea {
-  min-height: 440px; padding: 16px 20px;
+  height: calc(100vh - 380px);
+  min-height: 280px;
+  padding: 16px 20px;
   font-family: ui-monospace, monospace; font-size: 0.88rem; line-height: 1.7;
   border-radius: 0 0 10px 10px !important;
   outline: none; white-space: pre-wrap; word-break: break-word;
@@ -705,7 +670,7 @@
 .mdEditor .contentArea { border: none !important; box-shadow: none !important; }
 
 .mdPreview {
-  min-height: 400px; padding: 20px 24px;
+  height: calc(100vh - 380px); min-height: 280px; padding: 20px 24px;
   font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8;
   background: var(--bg-page);
 }

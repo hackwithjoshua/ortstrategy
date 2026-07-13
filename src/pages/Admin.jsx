@@ -692,7 +692,7 @@ function PostEditor({ post, onSave, onCancel }) {
             <label>Title *</label>
             <input value={form.title} onChange={e=>handleTitleChange(e.target.value)} placeholder="Post title..."/>
           </div>
-          <div className={`${styles.field} ${styles.contentField}`}>
+          <div className={styles.field}>
             <label>Content *</label>
             <MarkdownEditor key={post?.id || 'new'} value={form.content} onChange={v => set('content', v)} onOpenLibrary={openLibrary} />
           </div>
@@ -931,7 +931,7 @@ export default function Admin() {
 
   if (creating || editing) {
     return (
-      <div className={`${styles.page} ${styles.editorMode}`}>
+      <div className={styles.page}>
         <div className={styles.topBar}>
           <img src={ortLogo} alt="ORT Strategy" className={styles.barLogo}/>
           <button className={styles.logoutBtn} onClick={logout}><FaSignOutAlt/> Logout</button>
