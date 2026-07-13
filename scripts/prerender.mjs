@@ -104,22 +104,62 @@ const STATIC_ROUTES = [
   {
     path: 'hire-engineers',
     title: 'Hire Engineers — Pre-Vetted Tech Talent',
-    description: 'Hire pre-vetted software engineers, DevOps specialists, and tech talent through OrtStrategy. Fast matching, flexible engagement.',
+    description: 'Hire pre-vetted software engineers and DevOps specialists through OrtStrategy. React, Node.js, Python, AWS, Kubernetes. Matched within 48 hours. 98% client retention rate.',
+    noscript: `<main>
+      <h1>Hire Engineers Who Ship — OrtStrategy</h1>
+      <p>Stop wasting months on bad hires. OrtStrategy gives you battle-tested engineers, vetted for skill, communication, and reliability. Pre-vetted software engineers matched to your team within 48 hours. 98% client retention rate.</p>
+      <h2>How It Works</h2>
+      <ol>
+        <li><strong>Tell Us What You Need</strong> — Share your tech stack, team size, timezone, and engagement type. Takes 5 minutes.</li>
+        <li><strong>Meet Your Matches</strong> — Within 48 hours we present pre-vetted engineers that fit your exact requirements. No wasted interviews.</li>
+        <li><strong>Trial &amp; Onboard</strong> — Start with a paid trial week. If it is not a fit, we replace at no cost. Zero risk.</li>
+      </ol>
+      <h2>Engagement Types</h2>
+      <ul>
+        <li><strong>Part-Time</strong> — 20 hrs/week, dedicated engineer</li>
+        <li><strong>Full-Time</strong> — Senior engineer embedded in your team, working your hours, in your timezone</li>
+        <li><strong>Team</strong> — Full engineering squad for complex products</li>
+      </ul>
+      <h2>Tech Stacks</h2>
+      <p>Our engineers cover the full modern stack: React, React Native, Node.js, Python, Go, AWS, Google Cloud, Kubernetes, Docker, Terraform, PostgreSQL, MongoDB, and more.</p>
+      <h2>Hire Engineers Through OrtStrategy</h2>
+      <p>Submit your requirements at ortstrategy.com/hire-engineers and we will match you with the right engineer within 48 hours.</p>
+    </main>`,
   },
   {
     path: 'privacy-policy',
     title: 'Privacy Policy',
-    description: 'OrtStrategy Privacy Policy — how we collect, use, and protect your information.',
+    description: 'OrtStrategy Privacy Policy — how we collect, use, and protect your personal data. We are committed to transparency, security, and your right to privacy.',
+    noscript: `<main>
+      <h1>OrtStrategy Privacy Policy</h1>
+      <p>OrtStrategy Tech Services is committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, and how we protect it. We collect only the data necessary to provide our services — such as contact information submitted through our website forms — and we never sell your data to third parties. You have the right to access, correct, or request deletion of your data at any time by contacting us at contact@ortstrategy.com.</p>
+    </main>`,
   },
   {
     path: 'terms-of-service',
     title: 'Terms of Service',
-    description: 'OrtStrategy Terms of Service — the terms that govern your use of our platform and services.',
+    description: 'OrtStrategy Terms of Service — the terms that govern your use of our website, platform, and engineering services.',
+    noscript: `<main>
+      <h1>OrtStrategy Terms of Service</h1>
+      <p>These Terms of Service govern your access to and use of the OrtStrategy website and services. By using our platform, you agree to these terms. OrtStrategy provides technology strategy, DevOps consulting, system design, and software engineering services subject to these terms. We reserve the right to update these terms as our services evolve. Continued use of our services constitutes acceptance of any updates.</p>
+    </main>`,
   },
   {
     path: 'work-policy',
     title: 'Work Policy',
-    description: 'OrtStrategy Work Policy — our standards and practices for client engagements.',
+    description: 'OrtStrategy Work Policy — our standards for delivery, communication, confidentiality, professionalism, and quality for all engineers and team members.',
+    noscript: `<main>
+      <h1>OrtStrategy Work Policy</h1>
+      <p>OrtStrategy Tech Services operates as a remote-first, results-driven technology firm. This Work Policy sets out the standards expected of every member of the OrtStrategy network — employees, contractors, and placed engineers alike.</p>
+      <h2>Delivery Over Presence</h2>
+      <p>We measure performance by the quality and timeliness of output, not hours logged. Every team member is trusted to manage their own schedule provided commitments are met and clients are served to the highest standard.</p>
+      <h2>Communication Standards</h2>
+      <p>Clear and proactive communication is non-negotiable. All team members must be responsive within agreed hours, attend scheduled meetings prepared, proactively flag blockers before they become problems, and communicate professionally in all interactions.</p>
+      <h2>Confidentiality</h2>
+      <p>All client information, project details, and technical architecture encountered during any engagement must be treated as strictly confidential during the engagement and indefinitely after it concludes. Breach of confidentiality is grounds for immediate termination.</p>
+      <h2>Professionalism and Quality</h2>
+      <p>Every member is expected to conduct themselves with integrity, take ownership of their work, and deliver to the highest quality standard. We do not ship work we are not proud of.</p>
+    </main>`,
   },
 ]
 
@@ -130,11 +170,15 @@ async function run() {
 
   // Static routes
   for (const route of STATIC_ROUTES) {
-    const html = inject(base, {
+    let html = inject(base, {
       title: route.title,
       description: route.description,
       canonical: `${SITE}/${route.path}`,
     })
+    // Inject noscript body content so Googlebot sees real text for snippet generation
+    if (route.noscript) {
+      html = html.replace('</body>', `\n  <noscript>\n    ${route.noscript}\n  </noscript>\n</body>`)
+    }
     write(resolve(process.cwd(), `dist/${route.path}/index.html`), html)
     console.log(`  ✓ /${route.path}`)
   }
