@@ -25,13 +25,19 @@ function loadEnv() {
 const env = loadEnv()
 const PROJECT_ID = env.VITE_FIREBASE_PROJECT_ID
 
+// ── HTML escape helper ────────────────────────────────────────────────────────
+const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
 // ── Convert stored markdown + @img tokens → plain crawlable HTML ─────────────
 function markdownToNoscriptHtml(md) {
   if (!md) return ''
   return md
     // Strip image tokens (@img:ID and standard markdown images)
-    .replace(/!\[[^\]]*\]\(@img:[^\)]+\)/g, '')
-    .replace(/!\[[^\]]*\]\([^\)]+\)/g, '')
+    .replace(/!\[[^\]]*\]\(@img:[^)]+\)/g, '')
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+    // Markdown links → <a> tags (external open in new tab)
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\[([^\]]+)\]\((\/[^)]*)\)/g, '<a href="$2">$1</a>')
     // ATX headings
     .replace(/^#{4,6}\s+(.+)$/gm, '<h4>$1</h4>')
     .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
@@ -141,6 +147,16 @@ const STATIC_ROUTES = [
     path: 'hire-engineers',
     title: 'Hire Engineers — Pre-Vetted Tech Talent',
     description: 'Hire pre-vetted software engineers and DevOps specialists through OrtStrategy. React, Node.js, Python, AWS, Kubernetes. Matched within 48 hours. 98% client retention rate.',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: 'Hire Engineers — OrtStrategy',
+      provider: { '@type': 'Organization', name: 'OrtStrategy', url: 'https://www.ortstrategy.com' },
+      description: 'Pre-vetted software engineers and DevOps specialists matched to your team within 48 hours. React, Node.js, Python, AWS, Kubernetes and more. 98% client retention rate.',
+      url: 'https://www.ortstrategy.com/hire-engineers',
+      serviceType: 'Software Engineering Staffing',
+      areaServed: 'Worldwide',
+    },
     noscript: `<main>
       <h1>Hire Engineers Who Ship — OrtStrategy</h1>
       <p>Stop wasting months on bad hires. OrtStrategy gives you battle-tested engineers, vetted for skill, communication, and reliability. Pre-vetted software engineers matched to your team within 48 hours. 98% client retention rate.</p>
@@ -210,6 +226,7 @@ async function run() {
       title: route.title,
       description: route.description,
       canonical: `${SITE}/${route.path}`,
+      jsonLd: route.jsonLd,
     })
     // Inject noscript body content so Googlebot sees real text for snippet generation
     if (route.noscript) {
@@ -248,10 +265,10 @@ async function run() {
     const bodyHtml = markdownToNoscriptHtml(post.content)
     const noscript = `<noscript>
     <article>
-      <h1>${post.title}</h1>
-      ${post.category ? `<p><strong>Category:</strong> ${post.category}</p>` : ''}
-      ${post.author ? `<p><strong>By</strong> ${post.author}${post.publishedAt ? ` · ${post.publishedAt}` : ''}</p>` : ''}
-      ${post.excerpt ? `<p>${post.excerpt}</p>` : ''}
+      <h1>${esc(post.title)}</h1>
+      ${post.category ? `<p><strong>Category:</strong> ${esc(post.category)}</p>` : ''}
+      ${post.author ? `<p><strong>By</strong> ${esc(post.author)}${post.publishedAt ? ` · ${post.publishedAt}` : ''}</p>` : ''}
+      ${post.excerpt ? `<p>${esc(post.excerpt)}</p>` : ''}
       ${bodyHtml}
     </article>
   </noscript>`
