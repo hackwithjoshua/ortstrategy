@@ -114,6 +114,8 @@
 .content :global(p) { margin-bottom: 22px; }
 .content :global(strong) { color: var(--text-primary); font-weight: 700; }
 .content :global(em) { font-style: italic; }
+.content :global(a) { color: #1d6bf3; text-decoration: underline; text-underline-offset: 3px; transition: color 0.15s; }
+.content :global(a:hover) { color: #00c8ff; }
 .content :global(code) {
   font-family: ui-monospace, monospace; font-size: 0.875em;
   background: rgba(29,107,243,0.1); color: var(--cyan);

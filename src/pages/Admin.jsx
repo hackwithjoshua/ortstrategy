@@ -59,8 +59,29 @@ function expandTokens(text, map) {
   )
 }
 
+// Convert text containing [text](url) markdown links into HTML with real <a> elements
+function renderTextWithLinks(text) {
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const escQ = s => esc(s).replace(/"/g, '&quot;')
+  const linkRe = /\[([^\]]*)\]\(((?:https?:\/\/|\/|#|mailto:)[^)]+)\)/g
+  const out = []
+  let last = 0, m
+  while ((m = linkRe.exec(text)) !== null) {
+    if (m.index > last) out.push(esc(text.slice(last, m.index)).replace(/\n/g, '<br>'))
+    const external = m[2].startsWith('http')
+    out.push(
+      `<a href="${escQ(m[2])}" class="${styles.editorLink}"` +
+      (external ? ` target="_blank" rel="noopener noreferrer"` : '') +
+      `>${esc(m[1])}</a>`
+    )
+    last = m.index + m[0].length
+  }
+  if (last < text.length) out.push(esc(text.slice(last)).replace(/\n/g, '<br>'))
+  return out.join('')
+}
+
 // Render tokenized markdown to HTML for the contentEditable display area
-// Images become real <img> elements wrapped in a span with an X remove button
+// Images become real <img> elements; links become real <a> elements
 function tokenizedToEditHtml(text, map) {
   const parts = (text || '').split(/(!\[[^\]]*\]\(@img:[a-z0-9]+\))/g)
   return parts.map(part => {
@@ -77,11 +98,7 @@ function tokenizedToEditHtml(text, map) {
         `</span>`
       )
     }
-    return part
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\n/g, '<br>')
+    return renderTextWithLinks(part)
   }).join('')
 }
 
@@ -107,6 +124,10 @@ function editHtmlToTokenized(html) {
         const alt = img.getAttribute('alt') || ''
         if (id) out += `\n![${alt}](@img:${id})\n`
       }
+    } else if (node.nodeName === 'A') {
+      const href = node.getAttribute('href') || ''
+      const text = node.textContent || ''
+      out += href ? `[${text}](${href})` : text
     } else {
       const isBlock = /^(DIV|P|H[1-6]|LI|BLOCKQUOTE)$/.test(node.nodeName)
       if (isBlock && out.length > 0 && !out.endsWith('\n')) out += '\n'
@@ -244,13 +265,24 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
     if (!href.startsWith('http') && !href.startsWith('/') && !href.startsWith('#') && !href.startsWith('mailto:')) {
       href = 'https://' + href
     }
+    const a = document.createElement('a')
+    a.href = href
+    a.textContent = savedLinkText.current
+    a.className = styles.editorLink
+    if (href.startsWith('http')) { a.target = '_blank'; a.rel = 'noopener noreferrer' }
     editorRef.current?.focus()
     const sel = window.getSelection()
     if (sel && savedRange.current) {
       sel.removeAllRanges()
       sel.addRange(savedRange.current)
+      const range = sel.getRangeAt(0)
+      range.deleteContents()
+      range.insertNode(a)
+      range.setStartAfter(a)
+      range.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(range)
     }
-    document.execCommand('insertText', false, `[${savedLinkText.current}](${href})`)
     setLinkPopover(false)
     handleInput()
   }

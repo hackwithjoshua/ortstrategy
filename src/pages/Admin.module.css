@@ -665,6 +665,16 @@
 .toolbarHint { font-size: 0.68rem; color: var(--text-muted); padding: 0 4px; white-space: nowrap; }
 .toolbarSep { width: 1px; height: 20px; background: var(--border-card); margin: 0 4px; }
 
+/* Links inside the editor */
+.editorLink {
+  color: #1d6bf3;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.editorLink:hover { color: #00c8ff; }
+
 /* Link popover */
 .linkPopover {
   display: flex; align-items: center; gap: 8px;
@@ -703,6 +713,7 @@
   height: calc(100vh - 380px); min-height: 280px; padding: 20px 24px;
   font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8;
   background: var(--bg-page);
+  overflow-y: auto;
 }
 .mdPreview :global(h2) { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin: 24px 0 12px; }
 .mdPreview :global(h3) { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 20px 0 8px; }
