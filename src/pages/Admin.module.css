@@ -665,6 +665,36 @@
 .toolbarHint { font-size: 0.68rem; color: var(--text-muted); padding: 0 4px; white-space: nowrap; }
 .toolbarSep { width: 1px; height: 20px; background: var(--border-card); margin: 0 4px; }
 
+/* Link popover */
+.linkPopover {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border-bottom: 1px solid rgba(29,107,243,0.3);
+  border-top: 1px solid rgba(29,107,243,0.15);
+  flex-shrink: 0;
+}
+.linkPopoverInput {
+  flex: 1; padding: 6px 10px; border-radius: 6px;
+  border: 1px solid var(--border-input); background: var(--bg-input);
+  color: var(--text-primary); font-size: 0.82rem; outline: none;
+  transition: border-color 0.2s;
+}
+.linkPopoverInput:focus { border-color: rgba(29,107,243,0.5); box-shadow: 0 0 0 2px rgba(29,107,243,0.1); }
+.linkPopoverInput::placeholder { color: var(--text-muted); }
+.linkPopoverInsert {
+  padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 700;
+  background: var(--gradient-primary); color: #fff; border: none; cursor: pointer;
+  transition: opacity 0.15s; flex-shrink: 0;
+}
+.linkPopoverInsert:hover { opacity: 0.88; }
+.linkPopoverCancel {
+  padding: 6px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+  background: none; border: 1px solid var(--border-card);
+  color: var(--text-muted); cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
+.linkPopoverCancel:hover { color: #ef4444; border-color: rgba(239,68,68,0.3); }
+
 .mdEditor .field input,
 .mdEditor textarea,
 .mdEditor .contentArea { border: none !important; box-shadow: none !important; }

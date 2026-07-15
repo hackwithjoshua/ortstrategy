@@ -140,6 +140,8 @@ function renderContent(content) {
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\[([^\]]+)\]\((\/[^)]*|#[^)]*)\)/g, '<a href="$2">$1</a>')
     .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')

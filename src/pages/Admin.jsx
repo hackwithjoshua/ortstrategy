@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import { Link } from 'react-router-dom'
 import { FaPlus, FaEdit, FaTrash, FaEye, FaSignOutAlt, FaCheck, FaTimes,
   FaBold, FaItalic, FaHeading, FaListUl, FaListOl, FaQuoteRight, FaCode, FaImage,
-  FaList, FaTh, FaSearch } from 'react-icons/fa'
+  FaLink, FaList, FaTh, FaSearch } from 'react-icons/fa'
 import { FiSun, FiMoon } from 'react-icons/fi'
 import { useTheme } from '../context/ThemeContext'
 import ortLogo from '../assets/ort-logo.png'
@@ -134,12 +134,17 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
   const imgMap = useRef({})
   const imgInputRef = useRef(null)
   const grammarTimer = useRef(null)
+  const savedRange = useRef(null)
+  const savedLinkText = useRef('')
+  const linkInputRef = useRef(null)
   const [preview, setPreview] = useState(false)
   const [hasSelection, setHasSelection] = useState(false)
   const [grammar, setGrammar] = useState([])
   const [grammarOpen, setGrammarOpen] = useState(false)
   const [checking, setChecking] = useState(false)
   const [insertingImg, setInsertingImg] = useState(false)
+  const [linkPopover, setLinkPopover] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
 
   // Initialize editor on mount — key prop on <MarkdownEditor> forces remount on post switch
   useEffect(() => {
@@ -218,6 +223,36 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
     editorRef.current?.focus()
     if (btn.block) togglePrefix(btn.wrap)
     else toggleWrap(btn.wrap)
+  }
+
+  // ── Link insertion ──
+  const handleLinkClick = () => {
+    const sel = window.getSelection()
+    if (!sel?.rangeCount || sel.isCollapsed) return
+    const text = sel.toString()
+    if (!text) return
+    savedRange.current = sel.getRangeAt(0).cloneRange()
+    savedLinkText.current = text
+    setLinkUrl('')
+    setLinkPopover(true)
+    setTimeout(() => linkInputRef.current?.focus(), 30)
+  }
+
+  const insertLink = () => {
+    let href = linkUrl.trim()
+    if (!href) { setLinkPopover(false); return }
+    if (!href.startsWith('http') && !href.startsWith('/') && !href.startsWith('#') && !href.startsWith('mailto:')) {
+      href = 'https://' + href
+    }
+    editorRef.current?.focus()
+    const sel = window.getSelection()
+    if (sel && savedRange.current) {
+      sel.removeAllRanges()
+      sel.addRange(savedRange.current)
+    }
+    document.execCommand('insertText', false, `[${savedLinkText.current}](${href})`)
+    setLinkPopover(false)
+    handleInput()
   }
 
   // ── Insert code block ──
@@ -331,6 +366,8 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
   const renderMd = (md) => (md || '')
     .replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre class="md-code-block"><code>$1</code></pre>')
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img class="md-inline-img" src="$2" alt="$1" />')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#1d6bf3;text-decoration:underline">$1</a>')
+    .replace(/\[([^\]]+)\]\((\/[^)]*|#[^)]*)\)/g, '<a href="$2" style="color:#1d6bf3;text-decoration:underline">$1</a>')
     .replace(/^### (.+)$/gm,'<h3>$1</h3>')
     .replace(/^## (.+)$/gm,'<h2>$1</h2>')
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
@@ -366,6 +403,15 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
             <span>{btn.label}</span>
           </button>
         ))}
+        <button
+          type="button"
+          className={`${styles.toolbarBtn} ${!hasSelection ? styles.toolbarDisabled : ''}`}
+          onClick={handleLinkClick}
+          title={hasSelection ? 'Insert link' : 'Select text first'}
+        >
+          <FaLink style={{ fontSize: '0.8rem' }} />
+          <span>Link</span>
+        </button>
         <div className={styles.toolbarSep} />
         <span className={styles.toolbarHint}>{hasSelection ? 'Click to toggle' : 'Select text'}</span>
         <div className={styles.toolbarSep} />
@@ -408,6 +454,27 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
           </button>
         </div>
       </div>
+
+      {/* Link URL popover */}
+      {linkPopover && (
+        <div className={styles.linkPopover}>
+          <FaLink style={{ fontSize: '0.75rem', color: 'var(--blue-bright)', flexShrink: 0 }} />
+          <input
+            ref={linkInputRef}
+            type="text"
+            className={styles.linkPopoverInput}
+            value={linkUrl}
+            onChange={e => setLinkUrl(e.target.value)}
+            placeholder="https://example.com or /blog/post-slug"
+            onKeyDown={e => {
+              if (e.key === 'Enter') { e.preventDefault(); insertLink() }
+              if (e.key === 'Escape') setLinkPopover(false)
+            }}
+          />
+          <button type="button" className={styles.linkPopoverInsert} onClick={insertLink}>Insert</button>
+          <button type="button" className={styles.linkPopoverCancel} onClick={() => setLinkPopover(false)}>✕</button>
+        </div>
+      )}
 
       {/* Grammar panel */}
       {grammarOpen && grammarCount > 0 && (
