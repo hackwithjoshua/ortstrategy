@@ -246,21 +246,37 @@ async function run() {
       canonical,
       ogType: 'article',
       image: post.coverImage || DEFAULT_IMG,
-      jsonLd: {
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: post.title,
-        description: post.excerpt || '',
-        image: post.coverImage || DEFAULT_IMG,
-        datePublished: post.publishedAt,
-        author: { '@type': 'Person', name: post.author },
-        publisher: {
-          '@type': 'Organization',
-          name: 'OrtStrategy',
-          logo: { '@type': 'ImageObject', url: `${SITE}/ort-logo.png` },
+      jsonLd: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          description: post.excerpt || '',
+          image: post.coverImage || DEFAULT_IMG,
+          datePublished: post.publishedAt,
+          dateModified: post.publishedAt,
+          author: {
+            '@type': 'Person',
+            name: post.author,
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'OrtStrategy',
+            logo: { '@type': 'ImageObject', url: `${SITE}/ort-logo.png` },
+          },
+          url: canonical,
+          mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
         },
-        url: canonical,
-      },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+            { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE}/blog` },
+            { '@type': 'ListItem', position: 3, name: post.title, item: canonical },
+          ],
+        },
+      ],
     })
     const bodyHtml = markdownToNoscriptHtml(post.content)
     const noscript = `<noscript>
