@@ -739,6 +739,7 @@ function PostEditor({ post, onSave, onCancel }) {
           role: 'OrtStrategy Team',
           email: post?.author?.email || user.email,
         },
+        readTimeMinutes: Math.max(1, Math.ceil(form.content.trim().split(/\s+/).length / 200)),
         updatedAt: serverTimestamp(),
       }
       if (!post) {

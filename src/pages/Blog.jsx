@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useInView } from 'framer-motion'
-import { collection, query, where, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'
 import { setSEO } from '../utils/seo'
 import BlogNavbar from '../components/BlogNavbar'
 import BlogFooter from '../components/BlogFooter'
 import styles from './Blog.module.css'
+
+const PROJECT_ID = import.meta.env.VITE_FIREBASE_PROJECT_ID
+const API_KEY = import.meta.env.VITE_FIREBASE_API_KEY
 
 const GRADIENTS = [
   'linear-gradient(135deg,#1d6bf3 0%,#00c8ff 100%)',
@@ -22,7 +23,7 @@ const CAT_COLORS = {
   'Full Stack':'#10b981', 'Data Engineering':'#f97316', Company:'#f59e0b',
 }
 
-const readTime = content => Math.max(1, Math.ceil((content?.split(' ').length || 0) / 200))
+const readTime = post => post.readTimeMinutes || Math.max(1, Math.ceil((post.content?.split(' ').length || 150) / 200))
 
 function Highlight({ text, query }) {
   if (!query || !text) return text
@@ -74,7 +75,7 @@ function FeaturedCard({ post }) {
               <span className={styles.sep}>·</span>
               <span>{formatDate(post.publishedAt)}</span>
               <span className={styles.sep}>·</span>
-              <span>{readTime(post.content)} min read</span>
+              <span>{readTime(post)} min read</span>
             </div>
           </div>
         </div>
@@ -130,7 +131,7 @@ function PostCard({ post, i }) {
             <div className={styles.metaRight}>
               <span>{formatDate(post.publishedAt)}</span>
               <span className={styles.sep}>·</span>
-              <span>{readTime(post.content)} min</span>
+              <span>{readTime(post)} min</span>
             </div>
           </div>
         </div>
@@ -160,7 +161,7 @@ export default function Blog() {
   }, [])
 
   useEffect(() => {
-    const CACHE_KEY = 'ort_blog_posts'
+    const CACHE_KEY = 'ort_blog_posts_v2'
     const cached = sessionStorage.getItem(CACHE_KEY)
     if (cached) {
       try {
@@ -171,14 +172,43 @@ export default function Blog() {
     }
     ;(async () => {
       try {
-        const q = query(collection(db,'posts'), where('published','==',true))
-        const snap = await getDocs(q)
-        const data = snap.docs.map(d => ({ id:d.id, ...d.data() }))
-        data.sort((a,b) => {
-          const ta = a.publishedAt?.toDate?.() || new Date(0)
-          const tb = b.publishedAt?.toDate?.() || new Date(0)
-          return tb - ta
+        const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery?key=${API_KEY}`
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            structuredQuery: {
+              from: [{ collectionId: 'posts' }],
+              where: { fieldFilter: { field: { fieldPath: 'published' }, op: 'EQUAL', value: { booleanValue: true } } },
+              select: { fields: [
+                { fieldPath: 'slug' }, { fieldPath: 'title' },
+                { fieldPath: 'excerpt' }, { fieldPath: 'coverImage' },
+                { fieldPath: 'category' }, { fieldPath: 'author' },
+                { fieldPath: 'publishedAt' }, { fieldPath: 'tags' },
+                { fieldPath: 'readTimeMinutes' },
+              ]},
+              orderBy: [{ field: { fieldPath: 'publishedAt' }, direction: 'DESCENDING' }],
+            },
+          }),
         })
+        const raw = await res.json()
+        const data = raw
+          .filter(r => r.document?.fields?.slug)
+          .map(r => {
+            const f = r.document.fields
+            return {
+              id: r.document.name.split('/').pop(),
+              slug: f.slug?.stringValue || '',
+              title: f.title?.stringValue || '',
+              excerpt: f.excerpt?.stringValue || '',
+              coverImage: f.coverImage?.stringValue || '',
+              category: f.category?.stringValue || '',
+              author: { name: f.author?.mapValue?.fields?.name?.stringValue || 'OrtStrategy' },
+              publishedAt: f.publishedAt?.timestampValue || null,
+              tags: f.tags?.arrayValue?.values?.map(v => v.stringValue) || [],
+              readTimeMinutes: parseInt(f.readTimeMinutes?.integerValue || f.readTimeMinutes?.doubleValue || 0) || null,
+            }
+          })
         try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)) } catch { /* storage full */ }
         setPosts(data)
       } catch(e) { console.error(e) }
