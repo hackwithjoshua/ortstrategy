@@ -1044,8 +1044,7 @@
 
 /* Small phone */
 @media (max-width: 400px) {
-  .navCtaLabel { display: none; }
-  .navCta { padding: 9px 12px; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
+  .navCta { display: none; }
   .heroTitle { font-size: 1.9rem; }
   .heroLogoImg { height: 72px; }
   .logoWrap { width: 120px; height: 120px; }
