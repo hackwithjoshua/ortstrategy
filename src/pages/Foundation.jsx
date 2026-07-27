@@ -6,9 +6,25 @@ import {
   FaHandsHelping, FaGlobeAfrica, FaArrowLeft, FaArrowRight,
   FaHeart, FaUsers, FaEnvelope,
 } from 'react-icons/fa'
+import { FiSun, FiMoon } from 'react-icons/fi'
 import ortLogo from '../assets/ort-logo.png'
+import { useTheme } from '../context/ThemeContext'
 import { setSEO } from '../utils/seo'
 import styles from './Foundation.module.css'
+
+function ThemeToggle() {
+  const { theme, toggle } = useTheme()
+  return (
+    <motion.button
+      className={styles.themeBtn}
+      onClick={toggle}
+      whileTap={{ scale: 0.92 }}
+      aria-label="Toggle theme"
+    >
+      {theme === 'light' ? <FiMoon size={16} /> : <FiSun size={16} />}
+    </motion.button>
+  )
+}
 
 const PILLARS = [
   {
@@ -116,20 +132,27 @@ export default function Foundation() {
 
       {/* ── NAV ── */}
       <nav className={styles.nav}>
-        <Link to="/" className={styles.navBack}>
-          <FaArrowLeft size={11} />
-          <span>OrtStrategy</span>
-        </Link>
+        <div className={styles.navLeft}>
+          <Link to="/" className={styles.navBack}>
+            <FaArrowLeft size={11} />
+            <span className={styles.navBackLabel}>OrtStrategy</span>
+          </Link>
+        </div>
+
         <Link to="/foundation" className={styles.navBrand}>
           <img src={ortLogo} alt="OrtStrategy" className={styles.navLogo} />
           <span className={styles.navFoundation}>Foundation</span>
         </Link>
-        <a
-          href="mailto:contact@ortstrategy.com?subject=Foundation — Apply for Support"
-          className={styles.navCta}
-        >
-          Apply for Support
-        </a>
+
+        <div className={styles.navRight}>
+          <ThemeToggle />
+          <a
+            href="mailto:contact@ortstrategy.com?subject=Foundation — Apply for Support"
+            className={styles.navCta}
+          >
+            <span className={styles.navCtaLabel}>Apply for Support</span>
+          </a>
+        </div>
       </nav>
 
       {/* ── HERO ── */}
