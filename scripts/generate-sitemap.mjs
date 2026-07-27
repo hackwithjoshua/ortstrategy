@@ -40,6 +40,7 @@ const STATIC_PAGES = [
   { url: '/',                 priority: '1.0', changefreq: 'weekly'  },
   { url: '/blog',             priority: '0.9', changefreq: 'daily'   },
   { url: '/hire-engineers',   priority: '0.8', changefreq: 'monthly' },
+  { url: '/foundation',       priority: '0.8', changefreq: 'monthly' },
   { url: '/work-policy',      priority: '0.4', changefreq: 'yearly'  },
   { url: '/privacy-policy',   priority: '0.3', changefreq: 'yearly'  },
   { url: '/terms-of-service', priority: '0.3', changefreq: 'yearly'  },

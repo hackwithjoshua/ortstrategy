@@ -25,6 +25,7 @@ const BlogPost       = lazy(() => import('./pages/BlogPost'))
 // AdminWithAuth bundles AuthProvider + firebase/auth together, kept out of the
 // main bundle so home/blog visitors never download Firebase Auth.
 const AdminWithAuth  = lazy(() => import('./pages/AdminWithAuth'))
+const Foundation     = lazy(() => import('./pages/Foundation'))
 
 function Home() {
   return (
@@ -62,6 +63,7 @@ function App() {
             <Route path="/privacy-policy"  element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/work-policy"     element={<WorkPolicy />} />
+            <Route path="/foundation"      element={<Foundation />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

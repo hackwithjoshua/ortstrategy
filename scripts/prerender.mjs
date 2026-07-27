@@ -144,6 +144,26 @@ const STATIC_ROUTES = [
     description: 'Engineering insights, deep dives, and stories from the OrtStrategy team. DevOps, security, system design, and more.',
   },
   {
+    path: 'foundation',
+    title: 'OrtStrategy Foundation — Technology as a Force for Good',
+    description: 'The OrtStrategy Foundation channels the power of engineering and innovation to uplift communities, bridge the digital divide, and create opportunity for those who need it most.',
+    noscript: `<main>
+      <h1>OrtStrategy Foundation — Technology as a Force for Good</h1>
+      <p>The OrtStrategy Foundation is a humanitarian initiative by OrtStrategy Tech Services. We channel the power of engineering and innovation to uplift communities, bridge the digital divide, and create lasting opportunity for those who need it most.</p>
+      <h2>Our Mission</h2>
+      <p>Nobody should be left behind by the digital age. Every engineer we place, every system we build, every company we help scale — a portion of that effort feeds directly into the Foundation.</p>
+      <h2>Areas of Impact</h2>
+      <ul>
+        <li><strong>Education &amp; Scholarships</strong> — Funding tech education for underserved youth, coding bootcamps, and university grants.</li>
+        <li><strong>Healthcare Access</strong> — Building digital health tools and connecting clinics to telemedicine and life-saving resources.</li>
+        <li><strong>Digital Inclusion</strong> — Providing devices, internet access, and digital literacy training to communities left behind.</li>
+        <li><strong>Food &amp; Livelihood</strong> — Supporting food security programmes and tech-enabled livelihoods.</li>
+      </ul>
+      <h2>Get Involved</h2>
+      <p>Donate, volunteer, or partner with us. Contact us at contact@ortstrategy.com to apply for support or get involved.</p>
+    </main>`,
+  },
+  {
     path: 'hire-engineers',
     title: 'Hire Engineers — Pre-Vetted Tech Talent',
     description: 'Hire pre-vetted software engineers and DevOps specialists through OrtStrategy. React, Node.js, Python, AWS, Kubernetes. Matched within 48 hours. 98% client retention rate.',
