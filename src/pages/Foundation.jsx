@@ -30,7 +30,7 @@ const PILLARS = [
   {
     icon: FaGraduationCap,
     title: 'Education & Scholarships',
-    desc: 'Funding tech education for underserved youth — coding bootcamps, university grants, and mentorship programmes that open doors that were never meant to be shut.',
+    desc: 'Funding tech education for underserved youth, coding bootcamps, university grants, and mentorship programmes that open doors that were never meant to be shut.',
     color: '#1d6bf3',
   },
   {
@@ -42,7 +42,7 @@ const PILLARS = [
   {
     icon: FaLaptop,
     title: 'Digital Inclusion',
-    desc: 'Providing devices, internet access, and digital literacy training to families cut off from the online world — because connectivity is not a luxury.',
+    desc: 'Providing devices, internet access, and digital literacy training to families cut off from the online world, because connectivity is not a luxury.',
     color: '#7c3aed',
   },
   {
@@ -57,7 +57,7 @@ const STEPS = [
   {
     num: '01',
     title: 'Apply or Nominate',
-    desc: 'Submit your story or nominate a community in need. No application is too small — every single life matters to us.',
+    desc: 'Submit your story or nominate a community in need. No application is too small, every single life matters to us.',
     icon: FaEnvelope,
   },
   {
@@ -69,7 +69,7 @@ const STEPS = [
   {
     num: '03',
     title: 'Impact Delivered',
-    desc: 'Resources, training, devices, and direct support are deployed to those who need it most — measurably and transparently.',
+    desc: 'Resources, training, devices, and direct support are deployed to those who need it most, measurably and transparently.',
     icon: FaHandsHelping,
   },
 ]
@@ -121,7 +121,7 @@ function StepCard({ step, i }) {
 export default function Foundation() {
   useEffect(() => {
     setSEO({
-      title: 'OrtStrategy Foundation — Technology as a Force for Good',
+      title: 'OrtStrategy Foundation, Technology as a Force for Good',
       description: 'The OrtStrategy Foundation channels the power of engineering and innovation to uplift communities, bridge the digital divide, and create opportunity for those who need it most.',
       path: '/foundation',
     })
@@ -147,7 +147,7 @@ export default function Foundation() {
         <div className={styles.navRight}>
           <ThemeToggle />
           <a
-            href="mailto:contact@ortstrategy.com?subject=Foundation — Apply for Support"
+            href="mailto:contact@ortstrategy.com?subject=Foundation, Apply for Support"
             className={styles.navCta}
           >
             <span className={styles.navCtaLabel}>Apply for Support</span>
@@ -213,13 +213,13 @@ export default function Foundation() {
             transition={{ delay: 0.65, duration: 0.6 }}
           >
             <a
-              href="mailto:contact@ortstrategy.com?subject=Foundation — Apply for Support"
+              href="mailto:contact@ortstrategy.com?subject=Foundation, Apply for Support"
               className={styles.ctaPrimary}
             >
               Apply for Support <FaArrowRight size={13} />
             </a>
             <a
-              href="mailto:contact@ortstrategy.com?subject=Foundation — Partner With Us"
+              href="mailto:contact@ortstrategy.com?subject=Foundation, Partner With Us"
               className={styles.ctaOutline}
             >
               Partner With Us
@@ -284,7 +284,7 @@ export default function Foundation() {
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
-            Every engineer we place, every system we build, every company we help scale —
+            Every engineer we place, every system we build, every company we help scale,
             a portion of that effort feeds directly into the Foundation. Because progress
             that doesn't lift others is incomplete.
           </motion.p>
@@ -357,7 +357,7 @@ export default function Foundation() {
           <div className={styles.sectionHead}>
             <p className={styles.eyebrow}>Get Involved</p>
             <h2 className={styles.sectionTitle}>Every Action Matters</h2>
-            <p className={styles.sectionSub}>Three ways to be part of the change — pick the one that fits you.</p>
+            <p className={styles.sectionSub}>Three ways to be part of the change, pick the one that fits you.</p>
           </div>
           <div className={styles.involveGrid}>
 
@@ -370,9 +370,9 @@ export default function Foundation() {
             >
               <div className={styles.involveIconBlue}><FaHandHoldingHeart size={30} /></div>
               <h3 className={styles.involveTitle}>Donate</h3>
-              <p className={styles.involveDesc}>Any contribution — large or small — directly funds education, devices, and healthcare access for real people in real communities.</p>
+              <p className={styles.involveDesc}>Any contribution, large or small, directly funds education, devices, and healthcare access for real people in real communities.</p>
               <a
-                href="mailto:contact@ortstrategy.com?subject=Foundation — Donation"
+                href="mailto:contact@ortstrategy.com?subject=Foundation, Donation"
                 className={`${styles.involveBtn} ${styles.involveBtnBlue}`}
               >
                 Make a Donation <FaArrowRight size={11} />
@@ -388,9 +388,9 @@ export default function Foundation() {
             >
               <div className={styles.involveIconCyan}><FaHandsHelping size={30} /></div>
               <h3 className={styles.involveTitle}>Volunteer</h3>
-              <p className={styles.involveDesc}>Engineers, designers, doctors, educators — your skills are needed. A few hours a month directly changes someone's trajectory forever.</p>
+              <p className={styles.involveDesc}>Engineers, designers, doctors, educators, your skills are needed. A few hours a month directly changes someone's trajectory forever.</p>
               <a
-                href="mailto:contact@ortstrategy.com?subject=Foundation — Volunteer"
+                href="mailto:contact@ortstrategy.com?subject=Foundation, Volunteer"
                 className={`${styles.involveBtn} ${styles.involveBtnGrad}`}
               >
                 Join as a Volunteer <FaArrowRight size={11} />
@@ -406,9 +406,9 @@ export default function Foundation() {
             >
               <div className={styles.involveIconViolet}><FaGlobeAfrica size={30} /></div>
               <h3 className={styles.involveTitle}>Partner</h3>
-              <p className={styles.involveDesc}>NGOs, corporations, and community organisations — let's multiply impact together. We're open to all forms of meaningful partnership.</p>
+              <p className={styles.involveDesc}>NGOs, corporations, and community organisations, let's multiply impact together. We're open to all forms of meaningful partnership.</p>
               <a
-                href="mailto:contact@ortstrategy.com?subject=Foundation — Partnership"
+                href="mailto:contact@ortstrategy.com?subject=Foundation, Partnership"
                 className={`${styles.involveBtn} ${styles.involveBtnViolet}`}
               >
                 Become a Partner <FaArrowRight size={11} />
@@ -432,7 +432,7 @@ export default function Foundation() {
         >
           <h2 className={styles.finalTitle}>Ready to be part of the change?</h2>
           <p className={styles.finalSub}>
-            Whether you need support, want to give it, or want to amplify it —
+            Whether you need support, want to give it, or want to amplify it,
             reach out today. No bureaucracy. Just people helping people.
           </p>
           <motion.a
@@ -452,7 +452,7 @@ export default function Foundation() {
           <img src={ortLogo} alt="OrtStrategy" className={styles.footerLogoImg} />
         </Link>
         <p className={styles.footerText}>
-          OrtStrategy Foundation — a humanitarian initiative by{' '}
+          OrtStrategy Foundation, a humanitarian initiative by{' '}
           <Link to="/" className={styles.footerA}>OrtStrategy Tech Services</Link>
         </p>
         <a href="mailto:contact@ortstrategy.com" className={styles.footerA}>

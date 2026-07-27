@@ -971,9 +971,14 @@
   width: auto;
   object-fit: contain;
   opacity: 0.65;
-  transition: opacity 0.2s;
+  filter: brightness(0) invert(1);
+  transition: opacity 0.2s, filter 0.2s;
 }
 .footerLogoImg:hover { opacity: 1; }
+
+[data-theme="light"] .footerLogoImg {
+  filter: none;
+}
 
 .footerText {
   font-size: 0.84rem;
