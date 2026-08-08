@@ -31,10 +31,24 @@ const esc = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 // ── Convert stored markdown + @img tokens → plain crawlable HTML ─────────────
 function markdownToNoscriptHtml(md) {
   if (!md) return ''
-  return md
-    // Strip image tokens (@img:ID and standard markdown images)
+
+  // Extract markdown pipe tables first (before line-level replacements)
+  let s = md
     .replace(/!\[[^\]]*\]\(@img:[^)]+\)/g, '')
     .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+
+  s = s.replace(
+    /^(\|[^\n]+\|\r?\n)(\|[-|: \t]+\|\r?\n)((?:\|[^\n]+\|\r?\n?)+)/gm,
+    (_, header, _sep, body) => {
+      const row = str => str.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim())
+      const ths = row(header).map(h => `<th>${h}</th>`).join('')
+      const trs = body.trim().split(/\r?\n/).filter(Boolean)
+        .map(r => `<tr>${row(r).map(c => `<td>${c}</td>`).join('')}</tr>`).join('')
+      return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>\n`
+    }
+  )
+
+  return s
     // Markdown links → <a> tags (external open in new tab)
     .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/\[([^\]]+)\]\((\/[^)]*)\)/g, '<a href="$2">$1</a>')

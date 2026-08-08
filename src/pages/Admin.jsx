@@ -128,6 +128,19 @@ function editHtmlToTokenized(html) {
       const href = node.getAttribute('href') || ''
       const text = node.textContent || ''
       out += href ? `[${text}](${href})` : text
+    } else if (node.nodeName === 'TABLE') {
+      const rows = Array.from(node.querySelectorAll('tr'))
+      if (!rows.length) return
+      const rowData = rows.map(tr => Array.from(tr.querySelectorAll('td,th')).map(c => c.textContent.trim()))
+      if (out.length > 0 && !out.endsWith('\n')) out += '\n'
+      out += '| ' + rowData[0].join(' | ') + ' |\n'
+      out += '| ' + rowData[0].map(() => '---').join(' | ') + ' |\n'
+      for (let i = 1; i < rowData.length; i++) {
+        out += '| ' + rowData[i].join(' | ') + ' |\n'
+      }
+      out += '\n'
+    } else if (/^(THEAD|TBODY|TFOOT|TR|TH|TD)$/.test(node.nodeName)) {
+      // handled by TABLE above — skip
     } else {
       const isBlock = /^(DIV|P|H[1-6]|LI|BLOCKQUOTE)$/.test(node.nodeName)
       if (isBlock && out.length > 0 && !out.endsWith('\n')) out += '\n'
@@ -293,6 +306,12 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
     document.execCommand('insertText', false, '\n```\npaste your code here\n```\n')
   }
 
+  // ── Insert table ──
+  const insertTable = () => {
+    editorRef.current?.focus()
+    document.execCommand('insertText', false, '\n| Header 1 | Header 2 | Header 3 |\n| --- | --- | --- |\n| Cell 1 | Cell 2 | Cell 3 |\n| Cell 4 | Cell 5 | Cell 6 |\n')
+  }
+
   // ── Insert image element at cursor position ──
   const insertImgAtCursor = (src, alt, id) => {
     imgMap.current[id] = { src, alt }
@@ -395,19 +414,35 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
     setGrammar(prev => prev.filter(m => m !== match))
   }
 
-  const renderMd = (md) => (md || '')
-    .replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre class="md-code-block"><code>$1</code></pre>')
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img class="md-inline-img" src="$2" alt="$1" />')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#1d6bf3;text-decoration:underline">$1</a>')
-    .replace(/\[([^\]]+)\]\((\/[^)]*|#[^)]*)\)/g, '<a href="$2" style="color:#1d6bf3;text-decoration:underline">$1</a>')
-    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
-    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/`(.+?)`/g,'<code>$1</code>')
-    .replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
-    .replace(/^- (.+)$/gm,'<li>$1</li>')
-    .replace(/\n\n/g,'</p><p>')
+  const renderMd = (md) => {
+    let s = (md || '')
+      .replace(/```[\w]*\n?([\s\S]*?)```/g, '<pre class="md-code-block"><code>$1</code></pre>')
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img class="md-inline-img" src="$2" alt="$1" />')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#1d6bf3;text-decoration:underline">$1</a>')
+      .replace(/\[([^\]]+)\]\((\/[^)]*|#[^)]*)\)/g, '<a href="$2" style="color:#1d6bf3;text-decoration:underline">$1</a>')
+
+    // Parse markdown pipe tables before paragraph / heading processing
+    s = s.replace(
+      /^(\|[^\n]+\|\r?\n)(\|[-|: \t]+\|\r?\n)((?:\|[^\n]+\|\r?\n?)+)/gm,
+      (_, header, _sep, body) => {
+        const row = str => str.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim())
+        const ths = row(header).map(h => `<th>${h}</th>`).join('')
+        const trs = body.trim().split(/\r?\n/).filter(Boolean)
+          .map(r => `<tr>${row(r).map(c => `<td>${c}</td>`).join('')}</tr>`).join('')
+        return `<div class="${styles.tableWrap}"><table class="${styles.mdTable}"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>\n\n`
+      }
+    )
+
+    return s
+      .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+      .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .replace(/`(.+?)`/g,'<code>$1</code>')
+      .replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
+      .replace(/^- (.+)$/gm,'<li>$1</li>')
+      .replace(/\n\n/g,'</p><p>')
+  }
 
   const grammarCount = grammar.length
   const errType = (m) => {
@@ -449,6 +484,9 @@ function MarkdownEditor({ value, onChange, onOpenLibrary }) {
         <div className={styles.toolbarSep} />
         <button type="button" className={styles.toolbarBtn} onClick={insertCodeBlock} title="Insert code block">
           <FaCode style={{ fontSize:'0.8rem' }}/><span>Code Block</span>
+        </button>
+        <button type="button" className={styles.toolbarBtn} onClick={insertTable} title="Insert table">
+          <FaTh style={{ fontSize:'0.8rem' }}/><span>Table</span>
         </button>
         <input ref={imgInputRef} type="file" accept="image/*" onChange={handleInlineImage} style={{ display:'none' }}/>
         <button

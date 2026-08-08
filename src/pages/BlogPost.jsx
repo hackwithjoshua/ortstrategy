@@ -133,6 +133,19 @@ function renderContent(content) {
     return `\x00BLOCK${blocks.length - 1}\x00`
   })
 
+  processed = processed.replace(
+    /^(\|[^\n]+\|\r?\n)(\|[-|: \t]+\|\r?\n)((?:\|[^\n]+\|\r?\n?)+)/gm,
+    (_, header, _sep, body) => {
+      const row = str => str.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim())
+      const ths = row(header).map(h => `<th>${escapeHtml(h)}</th>`).join('')
+      const trs = body.trim().split(/\r?\n/).filter(Boolean)
+        .map(r => `<tr>${row(r).map(c => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('')
+      const html = `<div class="blog-table-wrap"><table class="blog-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`
+      blocks.push(html)
+      return `\x00BLOCK${blocks.length - 1}\x00`
+    }
+  )
+
   processed = processed
     .replace(/^### (.+)$/gm, (_, t) => `<h3 id="${slugify(t)}">${t}<a href="#${slugify(t)}" class="blog-heading-anchor">#</a></h3>`)
     .replace(/^## (.+)$/gm, (_, t) => `<h2 id="${slugify(t)}">${t}<a href="#${slugify(t)}" class="blog-heading-anchor">#</a></h2>`)
